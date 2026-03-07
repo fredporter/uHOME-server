@@ -11,6 +11,7 @@ material that was previously stored in the `uDOS` monorepo under explicit
 - Home Assistant bridge routes and command handlers
 - Home Assistant library/container runtime and standalone gateway service
 - `uHOME` presentation service and platform routes
+- decentralized node and storage registry routes for multi-server LAN modeling
 - Sonic `uHOME` bundle, preflight, and install-plan modules
 - focused route/service/install-plan tests
 - workspace defaults and instructions for the `uhome` component

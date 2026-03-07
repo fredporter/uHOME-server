@@ -54,6 +54,7 @@ The API exposes:
 - `/api/platform/uhome/*` for presentation status/control
 - `/api/library/*` for cloned library repo management
 - `/api/containers/*` for manifest-driven container clone/launch status
+- `/api/network/*` for decentralized node and storage-volume registry state
 
 ## License
 
