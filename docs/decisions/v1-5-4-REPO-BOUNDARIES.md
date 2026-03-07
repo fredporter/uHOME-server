@@ -43,6 +43,8 @@ Commercial client apps remain outside the uDOS repo.
 
 Current private app lanes:
 - `uHOME-android-app`
+- `uHOME-google-tv-app`
+- `uHOME-apple-tv-app`
 - `OBSC-android-app`
 - `OBSC-mac-app`
 
@@ -108,4 +110,4 @@ Sonic should instead follow:
 - keep Empire internal and Wizard-activated
 - move Sonic ownership to `uDOS-sonic`
 - keep `uHOME-server` separate
-- keep commercial macOS/Android apps in separate private repos
+- keep commercial macOS/Android/TV apps in separate private repos

@@ -8,6 +8,8 @@ Build a second Android lane where the tablet acts as a **uHOME kiosk/controller*
 
 - uHOME is separate from the main uDOS repo
 - the uHOME Android app and uHOME macOS app are separate client repositories
+- Google TV and Apple TV client lanes should also remain separate client app
+  repositories rather than being implemented inside the server repo
 - this decision is retained here because uDOS must define the server, launcher, route, and control contracts those clients consume
 
 ## Topology
@@ -17,6 +19,10 @@ Build a second Android lane where the tablet acts as a **uHOME kiosk/controller*
 - hybrid Linux / Windows deployment
 - Linux side should be the preferred uHOME / Wizard / Sonic host
 - Windows 10 “toybox” side is auxiliary, not the orchestration authority
+- the Linux side may also be a standalone Steam-server with no Windows layer
+- multiple satellite-style Linux Steam servers may coexist on the LAN so the
+  kiosk/controller can still target an available `uHOME` server if one
+  dual-boot machine is offline for dedicated gaming
 
 ### Tablet
 - Android 15 tablet
@@ -24,6 +30,12 @@ Build a second Android lane where the tablet acts as a **uHOME kiosk/controller*
 - controller-friendly UI
 - LAN control/display surface
 - Thin-GUI overlay capable
+
+### TV client surfaces
+- Google TV is a valid Android-derived living-room client target
+- Apple TV is a valid tvOS living-room client target
+- both operate as remote-first client surfaces over the LAN rather than as
+  authoritative server hosts
 
 ## Canonical uHOME direction
 
@@ -42,6 +54,7 @@ uHOME remains:
 - capture/post-processing orchestration
 - remote/control-plane endpoints
 - storage and media library organization
+- Linux-side Steam-server availability for household continuity across the LAN
 
 ### Android kiosk owns
 - launcher shell
@@ -50,6 +63,19 @@ uHOME remains:
 - Thin-GUI surfaces
 - local status panels
 - remote session/control entry points
+
+### Google TV / Apple TV clients own
+- remote-first launcher and browsing UI
+- household-safe playback entry points
+- queue, playback, and dashboard views
+- LAN session/control entry points appropriate to TV UX
+
+They do not own:
+
+- DVR authority
+- ingest pipelines
+- canonical library state
+- Linux-side orchestration
 
 ## Main UX surfaces
 

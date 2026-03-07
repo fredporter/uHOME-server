@@ -30,9 +30,23 @@ The canonical v1.5 `uHOME` shape has two roles:
 The server is the primary deployment role. The TV node is a bounded companion
 playback role for household viewing surfaces.
 
+For this standalone repository, the canonical `uHOME Server` implementation is
+the Linux-side server runtime. It may be deployed:
+
+- as a standalone Linux Steam-server
+- as the Linux side of a Sonic-installed dual-boot disk
+
+In the dual-boot case, the Windows 10 gaming layer is auxiliary for gaming
+workloads and does not become the orchestration authority for the home-profile
+lane.
+
 The canonical v1.5 scope does not treat the older hybrid-console,
 dual-boot-gaming, or broad appliance exploration docs as baseline product
 requirements.
+
+Client applications may also exist as separate LAN-facing companion surfaces,
+including Android tablet, Google TV, and Apple TV / tvOS clients. These
+surfaces do not replace the Linux-side `uHOME Server` authority.
 
 ## Role model
 
@@ -55,6 +69,7 @@ Required capabilities:
 - Sonic install support
 - deterministic local config and file-backed state where applicable
 - at least one living-room presentation surface
+- Linux-hosted server runtime ownership
 
 Optional capabilities:
 
@@ -63,6 +78,17 @@ Optional capabilities:
 - Steam-console launcher shell
 - Home Assistant bridge
 - playback handoff target behavior
+- dual-boot Windows 10 gaming layer on the same physical machine
+- participation in a LAN cluster with other `uHOME` Steam-server nodes
+
+### Linux host model
+
+The canonical host for `uHOME Server` is Linux. Ubuntu-class deployments are a
+valid server target, and Alpine remains the thin-GUI-oriented presentation
+direction where relevant.
+
+macOS may be used for development, but it is not the canonical certified
+runtime target for `uHOME Server`.
 
 ### uHOME TV Node
 
@@ -93,6 +119,23 @@ The TV node is not required to own:
 - tuner discovery
 - heavy post-processing
 - full library management
+
+### Client surface lanes
+
+Additional living-room clients may target `uHOME Server` over the LAN without
+becoming `uHOME Server` nodes themselves.
+
+Current expected client lanes include:
+
+- Android app
+- Google TV app
+- Apple TV / tvOS app
+
+Rules:
+
+- these clients are remote-friendly playback and control surfaces
+- they may provide launcher, browsing, queue, and playback-control UX
+- they must not become the primary DVR, ingest, or orchestration authority
 
 ## Runtime ownership
 
@@ -168,6 +211,8 @@ Wizard networking, and Sonic install contracts.
 - a deployment may ship Steam-console only
 - a deployment may ship both modes side by side
 - presentation choice must not redefine the install, DVR, or network contract
+- Google TV and Apple TV client surfaces are valid downstream presentation
+  targets but are separate from the Linux-side server runtime
 
 ## Network and node model
 
@@ -179,6 +224,22 @@ Wizard networking, and Sonic install contracts.
   - authoritative home-node for ingest, library state, and LAN service
 - `uHOME TV Node`
   - playback-focused node that consumes server-hosted media and control signals
+
+### Multi-server LAN model
+
+The home-profile lane may include multiple Linux `uHOME Server` nodes on the
+same LAN when that improves resilience or household access.
+
+Rules:
+
+- one node may act as the primary ingest and library authority
+- additional satellite-style Steam servers may provide launcher, playback, or
+  cached-serving continuity on the LAN
+- a more powerful dual-boot machine may temporarily leave Linux-side duties to
+  run dedicated Windows gaming without invalidating the rest of the `uHOME`
+  network
+- temporary loss of a dual-boot node must not take down the whole household
+  `uHOME` experience if other Linux-side nodes remain available
 
 ### Wizard networking protocol alignment
 
@@ -257,6 +318,19 @@ Default role mapping:
 - primary target: `uHOME Server`
 - secondary use for `uHOME TV Node` allowed only when the staged component set
   is intentionally narrowed to playback-facing responsibilities
+
+### Lane 2: Sonic dual-boot disk
+
+Sonic may also install a dual-boot disk for a `uHOME` Steam-server plus Windows
+10 gaming layer.
+
+Rules:
+
+- Linux remains the `uHOME Server` authority on that machine
+- Windows 10 exists as a dedicated gaming layer, not as the home-profile
+  orchestration host
+- if that dual-boot machine is unavailable to the Linux-side LAN topology,
+  other satellite `uHOME` Steam servers may continue serving the household lane
 
 Standalone support rules:
 

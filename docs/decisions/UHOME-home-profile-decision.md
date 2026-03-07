@@ -29,6 +29,13 @@ For v1.5, the canonical `uHOME` product shape is:
 - `uHOME Server` as the primary certified home-profile deployment role
 - `uHOME TV Node` as a bounded companion playback/appliance role
 
+For this standalone repository, `uHOME Server` is the Linux-side runtime. It
+may operate either:
+
+- as a standalone Linux Steam-server
+- as the Linux side of a Sonic-installed dual-boot disk paired with a Windows
+  10 gaming layer
+
 The `uHOME` user-facing runtime may be presented through:
 
 - an Alpine thin-GUI kiosk surface
@@ -47,6 +54,8 @@ processing, and open-box media workflow definitions where practical.
 - broadcast or local media sources feed a home node
 - the home node records, processes, and stores media locally
 - playback is served across the LAN to household devices
+- additional satellite-style Steam servers may remain on the LAN to preserve
+  household availability if a dual-boot gaming machine is offline
 
 ### Processing model
 
@@ -65,6 +74,8 @@ uHOME supports:
   surfaces, and any network-aware services
 - Sonic owns install and packaging behavior for supported home profile
   deployments
+- Linux remains the orchestration authority for `uHOME Server` even when a
+  Windows gaming layer is present on the same machine
 
 ## v1.5 Release Direction
 
@@ -90,6 +101,9 @@ home-profile commitments tracked in the roadmap.
 - household playback must work over LAN without requiring cloud mediation
 - install and packaging rules must remain explicit and profile-aware
 - home-profile workflows must align with the core vs Wizard boundary
+- the Linux side is the canonical `uHOME Server` runtime target
+- a dual-boot Windows gaming layer must not become required for baseline
+  `uHOME` household operation
 
 ## Related Documents
 
