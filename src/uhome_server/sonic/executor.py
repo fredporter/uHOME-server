@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from uhome_server.config import utc_now_iso_z
+from uhome_server.sonic.linux_assets import render_environment_file, render_service_unit, service_asset
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -28,25 +30,19 @@ def _sanitize_unit_name(name: str) -> str:
     return name.strip().replace("/", "-")
 
 
-def _service_unit(service_name: str, install_root: str) -> str:
-    unit_name = _sanitize_unit_name(service_name)
-    return "\n".join(
-        [
-            "[Unit]",
-            f"Description={unit_name} for uHOME",
-            "After=network-online.target",
-            "",
-            "[Service]",
-            "Type=simple",
-            f"WorkingDirectory={install_root}",
-            f"ExecStart=/usr/bin/env sh -lc 'echo Starting {unit_name} from {install_root}; sleep infinity'",
-            "Restart=on-failure",
-            "",
-            "[Install]",
-            "WantedBy=multi-user.target",
-            "",
-        ]
-    )
+def _write_text(path: Path, content: str) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return path
+
+
+def _enable_service(unit_path: Path, wants_dir: Path) -> Path:
+    wants_dir.mkdir(parents=True, exist_ok=True)
+    link_path = wants_dir / unit_path.name
+    if link_path.exists() or link_path.is_symlink():
+        link_path.unlink()
+    os.symlink(unit_path, link_path)
+    return link_path
 
 
 @dataclass(frozen=True)
@@ -55,7 +51,9 @@ class ExecutionResult:
     target_root: Path
     installed_components: list[str]
     config_paths: list[str]
+    environment_paths: list[str]
     service_unit_paths: list[str]
+    enabled_service_links: list[str]
     receipt_path: Path
     state_path: Path
     rollback_path: Path | None
@@ -66,7 +64,9 @@ class ExecutionResult:
             "target_root": str(self.target_root),
             "installed_components": self.installed_components,
             "config_paths": self.config_paths,
+            "environment_paths": self.environment_paths,
             "service_unit_paths": self.service_unit_paths,
+            "enabled_service_links": self.enabled_service_links,
             "receipt_path": str(self.receipt_path),
             "state_path": str(self.state_path),
             "rollback_path": None if self.rollback_path is None else str(self.rollback_path),
@@ -86,10 +86,14 @@ def execute_staged_install(stage_dir: Path, target_root: Path) -> ExecutionResul
     install_root = target_root / "install-root"
     state_root = target_root / "state"
     config_root = target_root / "config"
-    services_root = target_root / "systemd"
+    env_root = target_root / "etc" / "uhome"
+    services_root = target_root / "systemd" / "system"
+    wants_multi_root = target_root / "systemd" / "multi-user.target.wants"
+    wants_graphical_root = target_root / "systemd" / "graphical.target.wants"
+    bin_root = target_root / "bin"
     receipts_root = target_root / "receipts"
     rollback_root = target_root / "rollback"
-    for path in (install_root, state_root, config_root, services_root, receipts_root):
+    for path in (install_root, state_root, config_root, env_root, services_root, receipts_root, bin_root):
         path.mkdir(parents=True, exist_ok=True)
 
     installed_components: list[str] = []
@@ -104,8 +108,11 @@ def execute_staged_install(stage_dir: Path, target_root: Path) -> ExecutionResul
             installed_components.append(component_dir.name)
 
     config_paths: list[str] = []
+    environment_paths: list[str] = []
     service_unit_paths: list[str] = []
+    enabled_service_links: list[str] = []
     service_names: list[str] = []
+    service_payloads: dict[str, dict[str, Any]] = {}
     if config_dir.exists():
         for config_path in sorted(config_dir.glob("*.json")):
             payload = _read_json(config_path)
@@ -114,19 +121,49 @@ def execute_staged_install(stage_dir: Path, target_root: Path) -> ExecutionResul
             config_paths.append(str(target_config))
             service_name = payload.get("service_name")
             if isinstance(service_name, str) and service_name.strip():
-                service_names.append(service_name.strip())
+                normalized = service_name.strip()
+                service_names.append(normalized)
+                service_payloads[normalized] = payload
 
     for service_name in sorted(set(service_names)):
-        unit_path = services_root / f"{_sanitize_unit_name(service_name)}.service"
-        unit_path.write_text(_service_unit(service_name, receipt.get("install_root", "/opt/uhome")), encoding="utf-8")
+        install_root_str = str(receipt.get("install_root", "/opt/uhome"))
+        asset = service_asset(service_name, install_root_str)
+        merged_environment = {**asset.environment}
+        for key, value in service_payloads.get(service_name, {}).items():
+            if key in {"service_name", "component_id"}:
+                continue
+            merged_environment[key.upper()] = value
+        env_path = _write_text(env_root / f"{_sanitize_unit_name(service_name)}.env", render_environment_file(merged_environment))
+        environment_paths.append(str(env_path))
+        unit_path = _write_text(services_root / f"{_sanitize_unit_name(service_name)}.service", render_service_unit(asset))
         service_unit_paths.append(str(unit_path))
+        wants_root = wants_graphical_root if asset.wanted_by == "graphical.target" else wants_multi_root
+        enabled_link = _enable_service(unit_path, wants_root)
+        enabled_service_links.append(str(enabled_link))
+
+    _write_text(
+        bin_root / "systemctl-apply.sh",
+        "\n".join(
+            [
+                "#!/usr/bin/env sh",
+                "set -eu",
+                f'SYSTEMD_ROOT="{services_root.parent}"',
+                'echo "systemctl daemon-reload"',
+                f'echo "systemctl enable {" ".join(sorted(set(service_names)))}"',
+                f'echo "systemctl restart {" ".join(sorted(set(service_names)))}"',
+                "",
+            ]
+        ),
+    )
 
     receipt_payload = {
         **receipt,
         "executed_at": utc_now_iso_z(),
         "target_root": str(target_root),
         "installed_components": installed_components,
+        "environment_paths": environment_paths,
         "service_unit_paths": service_unit_paths,
+        "enabled_service_links": enabled_service_links,
     }
     receipt_path = _write_json(receipts_root / "install-receipt.json", receipt_payload)
 
@@ -138,7 +175,9 @@ def execute_staged_install(stage_dir: Path, target_root: Path) -> ExecutionResul
             "target_root": str(target_root),
             "status": "installed",
             "installed_components": installed_components,
+            "environment_paths": environment_paths,
             "service_unit_paths": service_unit_paths,
+            "enabled_service_links": enabled_service_links,
             "plan_steps": plan.get("steps", []),
         },
     )
@@ -154,7 +193,9 @@ def execute_staged_install(stage_dir: Path, target_root: Path) -> ExecutionResul
         target_root=target_root,
         installed_components=installed_components,
         config_paths=config_paths,
+        environment_paths=environment_paths,
         service_unit_paths=service_unit_paths,
+        enabled_service_links=enabled_service_links,
         receipt_path=receipt_path,
         state_path=state_path,
         rollback_path=rollback_path,

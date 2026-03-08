@@ -81,6 +81,11 @@ uhome-installer stage --bundle-dir ./bundle --probe ./probe.json --stage-dir ./s
 uhome-installer execute-stage --stage-dir ./stage --target-root ./target-root
 ```
 
+`execute-stage` writes Linux-oriented deployment assets into the target root,
+including environment files under `etc/uhome/`, systemd unit files under
+`systemd/system/`, target wants links, receipts, state, and a
+`bin/systemctl-apply.sh` helper for host-side enable/start orchestration.
+
 Example installer probes and verifiable sample bundles live under
 `examples/installer/`, including standalone Linux and dual-boot reference
 bundles.

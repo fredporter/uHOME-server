@@ -174,4 +174,5 @@ def test_installer_execute_stage_cli(tmp_path):
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["success"] is True
     assert (target_root / "receipts" / "install-receipt.json").exists()
-    assert (target_root / "systemd" / "jellyfin.service").exists()
+    assert (target_root / "systemd" / "system" / "jellyfin.service").exists()
+    assert (target_root / "etc" / "uhome" / "jellyfin.env").exists()

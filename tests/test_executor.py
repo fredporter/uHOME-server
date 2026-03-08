@@ -65,8 +65,14 @@ def test_execute_staged_install_writes_target_outputs(tmp_path):
     assert "jellyfin" in result.installed_components
     assert (target_root / "install-root" / "jellyfin" / "payload.tar.gz").exists()
     assert (target_root / "config" / "jellyfin.json").exists()
-    assert (target_root / "systemd" / "jellyfin.service").exists()
+    assert (target_root / "etc" / "uhome" / "jellyfin.env").exists()
+    assert (target_root / "systemd" / "system" / "jellyfin.service").exists()
+    assert (target_root / "systemd" / "multi-user.target.wants" / "jellyfin.service").exists()
+    unit_text = (target_root / "systemd" / "system" / "jellyfin.service").read_text(encoding="utf-8")
+    assert "EnvironmentFile=/etc/uhome/jellyfin.env" in unit_text
+    assert "ExecStart=/usr/bin/env sh -lc 'exec jellyfin" in unit_text
     assert (target_root / "receipts" / "install-receipt.json").exists()
+    assert (target_root / "bin" / "systemctl-apply.sh").exists()
     state = json.loads((target_root / "state" / "install-state.json").read_text(encoding="utf-8"))
     assert state["status"] == "installed"
 

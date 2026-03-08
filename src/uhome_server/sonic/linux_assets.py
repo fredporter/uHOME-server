@@ -1,0 +1,132 @@
+"""Linux deployment assets for staged uHOME installs."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass(frozen=True)
+class LinuxServiceAsset:
+    service_name: str
+    description: str
+    after: tuple[str, ...]
+    wants: tuple[str, ...]
+    exec_start: str
+    environment: dict[str, str]
+    wanted_by: str = "multi-user.target"
+    working_directory_var: str = "UHOME_INSTALL_ROOT"
+    restart: str = "on-failure"
+
+
+def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
+    return {
+        "jellyfin": LinuxServiceAsset(
+            service_name="jellyfin",
+            description="uHOME Jellyfin media service",
+            after=("network-online.target",),
+            wants=("network-online.target",),
+            exec_start="/usr/bin/env sh -lc 'exec jellyfin --datadir \"$UHOME_INSTALL_ROOT/var/jellyfin\"'",
+            environment={
+                "UHOME_INSTALL_ROOT": install_root,
+                "JELLYFIN_DATA_DIR": f"{install_root}/var/jellyfin",
+            },
+        ),
+        "comskip": LinuxServiceAsset(
+            service_name="comskip",
+            description="uHOME Comskip processing worker",
+            after=("network-online.target",),
+            wants=("network-online.target",),
+            exec_start="/usr/bin/env sh -lc 'exec comskip --ini=\"$UHOME_INSTALL_ROOT/etc/comskip.ini\"'",
+            environment={
+                "UHOME_INSTALL_ROOT": install_root,
+                "COMSKIP_INI": f"{install_root}/etc/comskip.ini",
+            },
+        ),
+        "uhome-dvr": LinuxServiceAsset(
+            service_name="uhome-dvr",
+            description="uHOME DVR orchestration service",
+            after=("network-online.target", "jellyfin.service"),
+            wants=("network-online.target",),
+            exec_start="/usr/bin/env sh -lc 'exec python3 -m uhome_server.app'",
+            environment={
+                "UHOME_INSTALL_ROOT": install_root,
+                "PYTHONPATH": f"{install_root}/src",
+                "UHOME_RUNTIME_MODE": "dvr",
+            },
+        ),
+        "uhome-ha-bridge": LinuxServiceAsset(
+            service_name="uhome-ha-bridge",
+            description="uHOME Home Assistant bridge",
+            after=("network-online.target",),
+            wants=("network-online.target",),
+            exec_start="/usr/bin/env sh -lc 'exec python3 -m uhome_server.services.home_assistant'",
+            environment={
+                "UHOME_INSTALL_ROOT": install_root,
+                "PYTHONPATH": f"{install_root}/src",
+                "HA_BRIDGE_ENABLED": "true",
+            },
+        ),
+        "uhome-kiosk": LinuxServiceAsset(
+            service_name="uhome-kiosk",
+            description="uHOME kiosk launcher session",
+            after=("graphical.target", "network-online.target"),
+            wants=("graphical.target", "network-online.target"),
+            exec_start="/usr/bin/env sh -lc 'exec steam -tenfoot'",
+            environment={
+                "UHOME_INSTALL_ROOT": install_root,
+                "UHOME_PRESENTATION_MODE": "steam-console",
+            },
+            wanted_by="graphical.target",
+        ),
+    }
+
+
+def service_asset(service_name: str, install_root: str) -> LinuxServiceAsset:
+    assets = _default_assets(install_root)
+    if service_name in assets:
+        return assets[service_name]
+    return LinuxServiceAsset(
+        service_name=service_name,
+        description=f"{service_name} for uHOME",
+        after=("network-online.target",),
+        wants=("network-online.target",),
+        exec_start=f"/usr/bin/env sh -lc 'echo Starting {service_name} from {install_root}; sleep infinity'",
+        environment={"UHOME_INSTALL_ROOT": install_root},
+    )
+
+
+def render_service_unit(asset: LinuxServiceAsset) -> str:
+    working_directory = asset.environment.get(asset.working_directory_var, "/opt/uhome")
+    lines = [
+        "[Unit]",
+        f"Description={asset.description}",
+    ]
+    if asset.after:
+        lines.append(f"After={' '.join(asset.after)}")
+    if asset.wants:
+        lines.append(f"Wants={' '.join(asset.wants)}")
+    lines.extend(
+        [
+            "",
+            "[Service]",
+            "Type=simple",
+            f"WorkingDirectory={working_directory}",
+            f"EnvironmentFile=/etc/uhome/{asset.service_name}.env",
+            f"ExecStart={asset.exec_start}",
+            f"Restart={asset.restart}",
+            "",
+            "[Install]",
+            f"WantedBy={asset.wanted_by}",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def render_environment_file(payload: dict[str, Any]) -> str:
+    lines = []
+    for key in sorted(payload):
+        value = str(payload[key]).replace("\n", " ").strip()
+        lines.append(f'{key}="{value}"')
+    return "\n".join(lines) + "\n"
