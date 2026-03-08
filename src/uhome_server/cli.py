@@ -10,6 +10,7 @@ from typing import Any
 
 from uhome_server.config import get_repo_root
 from uhome_server.sonic.health import run_promoted_health_checks
+from uhome_server.sonic.live_apply import run_ubuntu_apply_plan
 from uhome_server.sonic.executor import execute_staged_install
 from uhome_server.sonic.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
 from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
@@ -135,6 +136,11 @@ def installer_main(argv: list[str] | None = None) -> int:
     health_target_parser.add_argument("--host-root", required=True, help="Host-style root to health-check.")
     health_target_parser.add_argument("--output", help="Optional path to write the JSON result.")
 
+    live_apply_parser = subparsers.add_parser("apply-live", help="Run the generated Ubuntu apply plan. Dry-run unless --execute is set.")
+    live_apply_parser.add_argument("--host-root", required=True, help="Host-style root containing ubuntu-apply-plan.sh.")
+    live_apply_parser.add_argument("--execute", action="store_true", help="Actually execute the plan commands instead of reporting them.")
+    live_apply_parser.add_argument("--output", help="Optional path to write the JSON result.")
+
     args = parser.parse_args(argv)
 
     if args.command == "preflight":
@@ -235,6 +241,18 @@ def installer_main(argv: list[str] | None = None) -> int:
     if args.command == "health-check-target":
         try:
             result = run_promoted_health_checks(Path(args.host_root).expanduser().resolve())
+        except ValueError as exc:
+            _write_output({"success": False, "error": str(exc)}, args.output)
+            return 1
+        _write_output({"success": result.ok, "result": result.to_dict()}, args.output)
+        return 0 if result.ok else 1
+
+    if args.command == "apply-live":
+        try:
+            result = run_ubuntu_apply_plan(
+                Path(args.host_root).expanduser().resolve(),
+                execute=args.execute,
+            )
         except ValueError as exc:
             _write_output({"success": False, "error": str(exc)}, args.output)
             return 1

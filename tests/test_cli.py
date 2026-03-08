@@ -233,3 +233,19 @@ def test_installer_apply_and_rollback_cli(tmp_path):
     health_payload = json.loads(health_output.read_text(encoding="utf-8"))
     assert health_payload["success"] is True
     assert any(item["service"] == "jellyfin" for item in health_payload["result"]["checks"])
+
+    live_apply_output = tmp_path / "live-apply-output.json"
+    dry_run_code = installer_main(["apply-live", "--host-root", str(host_root), "--output", str(live_apply_output)])
+    assert dry_run_code == 0
+    dry_run_payload = json.loads(live_apply_output.read_text(encoding="utf-8"))
+    assert dry_run_payload["success"] is True
+    assert dry_run_payload["result"]["execute"] is False
+
+    with patch("uhome_server.sonic.live_apply.subprocess.run", side_effect=_runner):
+        live_code = installer_main(
+            ["apply-live", "--host-root", str(host_root), "--execute", "--output", str(live_apply_output)]
+        )
+    assert live_code == 0
+    live_payload = json.loads(live_apply_output.read_text(encoding="utf-8"))
+    assert live_payload["success"] is True
+    assert live_payload["result"]["execute"] is True
