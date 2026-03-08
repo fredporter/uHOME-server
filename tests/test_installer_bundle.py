@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from uhome_server.sonic.uhome_bundle import (
+from uhome_server.installer.bundle import (
     BUNDLE_MANIFEST_FILENAME,
     BUNDLE_SCHEMA_VERSION,
     UHOMEBundleComponent,
@@ -17,7 +17,7 @@ from uhome_server.sonic.uhome_bundle import (
     write_bundle_manifest,
     write_rollback_record,
 )
-from uhome_server.sonic.uhome_installer import UHOMEInstallOptions, build_uhome_install_plan
+from uhome_server.installer.plan import UHOMEInstallOptions, build_uhome_install_plan
 
 
 def _write_artifact(bundle_dir: Path, rel_path: str, content: bytes = b"fake-payload") -> str:

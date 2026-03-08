@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from uhome_server.sonic.executor import execute_staged_install
-from uhome_server.sonic.staging import stage_install_artifacts
-from uhome_server.sonic.uhome_installer import UHOMEInstallOptions
-from uhome_server.sonic.uhome_bundle import (
+from uhome_server.installer.executor import execute_staged_install
+from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.installer.plan import UHOMEInstallOptions
+from uhome_server.installer.bundle import (
     BUNDLE_SCHEMA_VERSION,
     UHOMEBundleComponent,
     UHOMEBundleManifest,
@@ -72,6 +72,7 @@ def test_execute_staged_install_writes_target_outputs(tmp_path):
     assert "EnvironmentFile=/etc/uhome/jellyfin.env" in unit_text
     assert "ExecStart=/usr/bin/env sh -lc 'exec jellyfin" in unit_text
     assert (target_root / "receipts" / "install-receipt.json").exists()
+    assert (target_root / "receipts" / "service-manifest.json").exists()
     assert (target_root / "bin" / "systemctl-apply.sh").exists()
     state = json.loads((target_root / "state" / "install-state.json").read_text(encoding="utf-8"))
     assert state["status"] == "installed"
@@ -88,3 +89,18 @@ def test_execute_staged_install_rejects_unready_stage(tmp_path):
         assert "not ready" in str(exc)
     else:
         raise AssertionError("Expected execute_staged_install to reject an unready stage")
+
+
+def test_execute_staged_install_requires_service_manifest(tmp_path):
+    stage_dir = tmp_path / "stage"
+    target_root = tmp_path / "target"
+    stage_dir.mkdir(parents=True, exist_ok=True)
+    (stage_dir / "install-plan.json").write_text(json.dumps({"ready": True}), encoding="utf-8")
+    (stage_dir / "install-receipt.json").write_text(json.dumps({"install_root": "/opt/uhome"}), encoding="utf-8")
+    (stage_dir / "config").mkdir(parents=True, exist_ok=True)
+    try:
+        execute_staged_install(stage_dir, target_root)
+    except ValueError as exc:
+        assert "Service manifest does not exist" in str(exc)
+    else:
+        raise AssertionError("Expected execute_staged_install to require a staged service manifest")

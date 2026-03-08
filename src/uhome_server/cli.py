@@ -9,15 +9,15 @@ from pathlib import Path
 from typing import Any
 
 from uhome_server.config import get_repo_root
-from uhome_server.sonic.health import run_promoted_health_checks
-from uhome_server.sonic.live_apply import run_ubuntu_apply_plan
-from uhome_server.sonic.executor import execute_staged_install
-from uhome_server.sonic.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
+from uhome_server.installer.health import run_promoted_health_checks
+from uhome_server.installer.live_apply import run_ubuntu_apply_plan
+from uhome_server.installer.executor import execute_staged_install
+from uhome_server.installer.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
 from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
-from uhome_server.sonic.staging import stage_install_artifacts
-from uhome_server.sonic.uhome_bundle import read_bundle_manifest, verify_bundle
-from uhome_server.sonic.uhome_installer import UHOMEInstallOptions, build_uhome_install_plan
-from uhome_server.sonic.uhome_preflight import preflight_check
+from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.installer.bundle import read_bundle_manifest, verify_bundle
+from uhome_server.installer.plan import UHOMEInstallOptions, build_uhome_install_plan
+from uhome_server.installer.preflight import preflight_check
 
 
 def _read_json(path: str) -> dict[str, Any]:

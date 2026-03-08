@@ -4,8 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from uhome_server.sonic.staging import stage_install_artifacts
-from uhome_server.sonic.uhome_bundle import (
+from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.installer.bundle import (
     BUNDLE_SCHEMA_VERSION,
     UHOMEBundleComponent,
     UHOMEBundleManifest,
@@ -13,7 +13,7 @@ from uhome_server.sonic.uhome_bundle import (
     write_rollback_record,
     UHOMERollbackRecord,
 )
-from uhome_server.sonic.uhome_installer import UHOMEInstallOptions
+from uhome_server.installer.plan import UHOMEInstallOptions
 
 
 def _probe() -> dict:
@@ -68,6 +68,7 @@ def test_stage_install_artifacts_writes_expected_outputs(tmp_path):
     )
     assert plan.ready is True
     assert staged.plan_path.exists()
+    assert staged.service_manifest_path.exists()
     assert staged.receipt_path.exists()
     assert staged.state_path.exists()
     assert staged.rollback_path is not None

@@ -3,17 +3,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from uhome_server.sonic.executor import execute_staged_install
-from uhome_server.sonic.health import run_promoted_health_checks
-from uhome_server.sonic.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
-from uhome_server.sonic.staging import stage_install_artifacts
-from uhome_server.sonic.uhome_bundle import (
+from uhome_server.installer.executor import execute_staged_install
+from uhome_server.installer.health import run_promoted_health_checks
+from uhome_server.installer.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
+from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.installer.bundle import (
     BUNDLE_SCHEMA_VERSION,
     UHOMEBundleComponent,
     UHOMEBundleManifest,
     write_bundle_manifest,
 )
-from uhome_server.sonic.uhome_installer import UHOMEInstallOptions
+from uhome_server.installer.plan import UHOMEInstallOptions
 
 
 def _probe() -> dict:

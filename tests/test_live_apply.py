@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from uhome_server.sonic.live_apply import run_ubuntu_apply_plan
+from uhome_server.installer.live_apply import run_ubuntu_apply_plan
 
 
 def _write_plan(host_root: Path) -> Path:

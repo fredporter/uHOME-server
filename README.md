@@ -1,76 +1,106 @@
 # uHOME Server
 
-uHOME Server is the standalone local-first home-media and home-operations
-server extracted from the `uDOS` home profile lane.
+uHOME Server is the local-network home infrastructure pathway for `uDOS`.
 
-This repository is the Linux side of `uHOME`: the standalone Steam-server and
-home-operations host that can run by itself or participate in a dual-boot
-deployment where Windows 10 is present as an auxiliary gaming layer.
+This repository owns the Linux-first server runtime for household media,
+automation, launcher, and dashboard surfaces. It stays separate from `uDOS`
+core and `uDOS-sonic`: `uDOS` owns the shared runtime and contracts,
+`uDOS-sonic` owns deployment and hardware bootstrap, and `uHOME-server` owns
+the home infrastructure runtime, examples, and pathway documentation.
 
-## Migrated Scope
+## Pathway Contract
 
-- Home Assistant bridge routes and command handlers
-- `uHOME` presentation status/start/stop routes
-- file-backed DVR scheduling, playback handoff, and ad-processing settings
-- Sonic-side `uHOME` bundle, preflight, and install-plan contracts
-- canonical v1.5 `uHOME` specs and decision docs
+Each repo in the family should answer the same questions in the same order.
 
-## Deployment Model
-
-- primary runtime target: Linux `uHOME Server`
-- valid standalone mode: Linux Steam-server without any Windows partition
-- valid dual-boot mode: Linux `uHOME Server` plus Windows 10 gaming layer
-- valid client surfaces: Android tablet, Google TV, and Apple TV style LAN
-  clients over separate app repos
-- LAN topology may include multiple satellite-style Steam servers so household
-  playback and launcher capacity can stay available when a more powerful
-  dual-boot machine is offline for dedicated Windows gaming
-- the media library may span multiple interconnected drives, partitions, and
-  server nodes that appear or disappear over time without collapsing the whole
-  household lane
+1. What pathway does this repo provide?
+   `uHOME-server` provides the local-network home infrastructure pathway for
+   `uDOS`.
+2. What Markdown or vault surfaces does it read or write?
+   Education-facing household examples live under `vault/`. The active runtime
+   still bootstraps local state under `memory/`.
+3. What services does it expose?
+   The server currently exposes Home Assistant, platform, runtime, library,
+   containers, network, and dashboard APIs.
+4. What modules are optional?
+   The current module families are media, DVR, home operations, Steam surface,
+   and Home Assistant bridge.
+5. How does it connect back to `uDOS` core?
+   Through shared contracts, workspace defaults, compatible install bundles, and
+   downstream client/server integration.
 
 ## Repository Layout
 
-- `src/uhome_server/` standalone service and install-plan code
-- `defaults/workspace/` migrated workspace seed defaults for `uHOME`
-- `tests/` focused coverage for migrated routes and Sonic contracts
-- `library/` git-backed library manifests and cloned runtime support
-- `docs/specs/` implementation-facing specifications
-- `docs/decisions/` architecture and product decisions
-- `docs/services/` migrated service-level operational docs
-- `docs/ui/` dashboard and client-surface contracts
-- `docs/workspace/` migrated workspace templates and instructions
+- `src/uhome_server/` active Python package and API/CLI entrypoints
+- `apps/` education-facing map of dashboard and kiosk surfaces
+- `modules/` capability-family map for home features
+- `services/` runtime service map for playback, scheduling, launcher, LAN
+  discovery, and bridge work
+- `vault/` Markdown-first sample household state
+- `courses/` student-facing learning path scaffold
+- `config/` stable checked-in configuration lane for the refactor
+- `scripts/linux/` Linux-side operational script lane
+- `examples/installer/` installer bundle and probe examples
+- `docs/` architecture, pathway, client, and implementation docs
+- `tests/` focused coverage for the standalone runtime
 
-## Development
+Phase 1 note:
 
-Install the package and dev dependencies, then run the API with uvicorn:
+- the live runtime remains in `src/uhome_server/`
+- the new top-level roots are an information-architecture scaffold first
+- no big-bang code move is required to use the repo today
 
-```bash
-python3 -m pip install -e '.[dev]'
-python3 -m uvicorn uhome_server.app:app --reload
-```
+See `docs/architecture/PHASE-1-IA-MAP.md` for the current-to-target mapping.
+See `docs/architecture/ROOT-POLICY.md` for canonical vs transitional root
+status.
 
-The server bootstraps its local runtime directories under `memory/` on startup
-and now uses `memory/config/uhome.json` as the canonical local config file,
-with legacy fallback to `memory/config/wizard.json` during migration.
+## Entry Points
 
-The API exposes:
+### Use
+
+Start here if you want to run or operate the current server:
+
+- `README.md` for runtime overview and commands
+- `docs/pathway/USE.md` for the current operator path
+- `examples/installer/` for standalone and dual-boot bundle examples
+
+### Learn
+
+Start here if you want to understand the pathway model:
+
+- `courses/` for the student-facing learning scaffold
+- `vault/` for Markdown-first household examples
+- `docs/pathway/README.md` for the repo's role in the wider `uDOS` family
+
+### Build
+
+Start here if you want to extend the repo or work on the refactor:
+
+- `docs/architecture/UHOME-SERVER-DEV-PLAN.md` for the active repo-local
+  development plan
+- `docs/uHOME-server-dev-brief.md` and
+  `docs/uHOME-server-education-dev-brief.md` for the two governing local briefs
+- `docs/README.md` for the maintainer-facing index
+- `docs/architecture/PHASE-1-IA-MAP.md` for current-to-target ownership
+- `docs/pathway/REPO-FAMILY.md` for `uDOS` / `uHOME` / `uDOS-sonic` boundary rules
+- `src/uhome_server/` for the active implementation package
+
+## Current Runtime
+
+The server bootstraps local runtime directories under `memory/` on startup and
+uses `memory/config/uhome.json` as the canonical local config file, with legacy
+fallback to `memory/config/wizard.json` during migration.
+
+Current API surfaces:
 
 - `/api/ha/*` for the Home Assistant bridge
-- `/api/platform/uhome/*` for presentation status/control
-- `/api/runtime/*` for runtime info and startup/readiness checks
+- `/api/platform/uhome/*` for presentation status and control
+- `/api/runtime/*` for runtime info and readiness checks
 - `/api/library/*` for cloned library repo management
-- `/api/containers/*` for manifest-driven container clone/launch status
-- `/api/network/*` for decentralized node and storage-volume registry state
-- `/api/dashboard/*` for aggregated `uHOME` dashboard health and summary state
+- `/api/containers/*` for manifest-driven container clone and launch status
+- `/api/network/*` for decentralized node and storage registry state
+- `/api/dashboard/*` for aggregated server health and summary state
 
-Run the current local test suite with:
-
-```bash
-python3 -m pytest
-```
-
-Operator CLI entrypoints are also available:
+Operator CLI entrypoints:
 
 ```bash
 uhome launcher status
@@ -87,22 +117,25 @@ uhome-installer apply-live --host-root ./host-root --execute
 uhome-installer rollback-target --host-root ./host-root
 ```
 
-`execute-stage` writes Linux-oriented deployment assets into the target root,
-including environment files under `etc/uhome/`, systemd unit files under
-`systemd/system/`, target wants links, receipts, state, and a
-`bin/systemctl-apply.sh` helper for host-side enable/start orchestration.
+## Development
 
-`apply-target` promotes those generated assets into a host-style filesystem
-layout under the chosen host root and snapshots the previous state for
-`rollback-target`. It also writes a `systemctl` command plan and verification
-report under `var/lib/uhome/`, plus a health-check plan and upgrade diff based
-on prior receipts. For real Ubuntu hosts it also writes
-`var/lib/uhome/ubuntu-apply-plan.sh` with a reviewable `sudo rsync` +
-`systemctl` apply sequence.
+Install the package and dev dependencies, then run the API with uvicorn:
 
-Example installer probes and verifiable sample bundles live under
-`examples/installer/`, including standalone Linux and dual-boot reference
-bundles.
+```bash
+python3 -m pip install -e '.[dev]'
+python3 -m uvicorn uhome_server.app:app --reload
+```
+
+Run the current local test suite with:
+
+```bash
+python3 -m pytest
+```
+
+The installer flow still materializes Linux-oriented target assets and
+host-promotion plans from the active Python package. That deployment machinery
+is transitional and documented in the Phase 1 mapping doc so boundary cleanup
+can continue without breaking the current runtime.
 
 ## License
 

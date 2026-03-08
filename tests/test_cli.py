@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from uhome_server.cli import installer_main, launcher_main
-from uhome_server.sonic.uhome_bundle import BUNDLE_SCHEMA_VERSION, UHOMEBundleComponent, UHOMEBundleManifest, write_bundle_manifest
+from uhome_server.installer.bundle import BUNDLE_SCHEMA_VERSION, UHOMEBundleComponent, UHOMEBundleManifest, write_bundle_manifest
 
 
 def _write_probe(path: Path) -> None:
@@ -227,7 +227,7 @@ def test_installer_apply_and_rollback_cli(tmp_path):
         del shell, text, capture_output
         return type("_Completed", (), {"returncode": 0, "stdout": f"ok: {command}", "stderr": ""})()
 
-    with patch("uhome_server.sonic.health.subprocess.run", side_effect=_runner):
+    with patch("uhome_server.installer.health.subprocess.run", side_effect=_runner):
         health_code = installer_main(["health-check-target", "--host-root", str(host_root), "--output", str(health_output)])
     assert health_code == 0
     health_payload = json.loads(health_output.read_text(encoding="utf-8"))
@@ -241,7 +241,7 @@ def test_installer_apply_and_rollback_cli(tmp_path):
     assert dry_run_payload["success"] is True
     assert dry_run_payload["result"]["execute"] is False
 
-    with patch("uhome_server.sonic.live_apply.subprocess.run", side_effect=_runner):
+    with patch("uhome_server.installer.live_apply.subprocess.run", side_effect=_runner):
         live_code = installer_main(
             ["apply-live", "--host-root", str(host_root), "--execute", "--output", str(live_apply_output)]
         )

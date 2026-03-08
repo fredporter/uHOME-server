@@ -1,8 +1,14 @@
 # uHOME Dev Roadmap
 
 Status: active
-Updated: 2026-03-07
+Updated: 2026-03-09
 Scope: standalone `uHOME Server` repository
+
+This roadmap is governed by:
+
+- `docs/uHOME-server-dev-brief.md`
+- `docs/uHOME-server-education-dev-brief.md`
+- `docs/architecture/UHOME-SERVER-DEV-PLAN.md`
 
 ## Goal
 
