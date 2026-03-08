@@ -203,6 +203,7 @@ def test_installer_apply_and_rollback_cli(tmp_path):
     apply_payload = json.loads(apply_output.read_text(encoding="utf-8"))
     assert apply_payload["success"] is True
     assert (host_root / "etc" / "systemd" / "system" / "jellyfin.service").exists()
+    assert Path(apply_payload["result"]["ubuntu_apply_plan_path"]).exists()
 
     rollback_output = tmp_path / "rollback-output.json"
     assert installer_main(["rollback-target", "--host-root", str(host_root), "--output", str(rollback_output)]) == 0

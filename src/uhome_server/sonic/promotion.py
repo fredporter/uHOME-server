@@ -34,6 +34,7 @@ class PromotionResult:
     mode: str
     upgrade_diff: dict[str, Any]
     command_plan_path: Path
+    ubuntu_apply_plan_path: Path
     health_check_plan_path: Path
     verification_path: Path
     receipt_path: Path
@@ -48,6 +49,7 @@ class PromotionResult:
             "mode": self.mode,
             "upgrade_diff": self.upgrade_diff,
             "command_plan_path": str(self.command_plan_path),
+            "ubuntu_apply_plan_path": str(self.ubuntu_apply_plan_path),
             "health_check_plan_path": str(self.health_check_plan_path),
             "verification_path": str(self.verification_path),
             "receipt_path": str(self.receipt_path),
@@ -129,6 +131,35 @@ def _write_command_plan(host_root: Path, service_names: list[str]) -> Path:
                 f"systemctl enable {joined}",
                 f"systemctl restart {joined}",
                 f"systemctl status {joined} --no-pager",
+            ]
+        )
+    else:
+        commands.append('echo "No uHOME services discovered to enable."')
+    plan_path.parent.mkdir(parents=True, exist_ok=True)
+    plan_path.write_text("\n".join(commands) + "\n", encoding="utf-8")
+    return plan_path
+
+
+def _write_ubuntu_apply_plan(host_root: Path, service_names: list[str]) -> Path:
+    plan_path = host_root / "var" / "lib" / "uhome" / "ubuntu-apply-plan.sh"
+    commands = [
+        "#!/usr/bin/env sh",
+        "set -eu",
+        f'HOST_ROOT="{host_root}"',
+        'sudo mkdir -p /opt/uhome /etc/uhome /etc/systemd/system /var/lib/uhome',
+        'sudo rsync -a --delete "$HOST_ROOT/opt/uhome/" "/opt/uhome/"',
+        'sudo rsync -a --delete "$HOST_ROOT/etc/uhome/" "/etc/uhome/"',
+        'sudo rsync -a --delete "$HOST_ROOT/etc/systemd/system/" "/etc/systemd/system/"',
+        'sudo rsync -a --delete "$HOST_ROOT/var/lib/uhome/" "/var/lib/uhome/"',
+        "sudo systemctl daemon-reload",
+    ]
+    if service_names:
+        joined = " ".join(service_names)
+        commands.extend(
+            [
+                f"sudo systemctl enable {joined}",
+                f"sudo systemctl restart {joined}",
+                f"sudo systemctl status {joined} --no-pager",
             ]
         )
     else:
@@ -265,6 +296,7 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
     install_state = _read_json(target_install_state) if target_install_state.exists() else {}
     upgrade_diff = _compute_upgrade_diff(prior_receipt, install_receipt)
     command_plan_path = _write_command_plan(host_root, service_names)
+    ubuntu_apply_plan_path = _write_ubuntu_apply_plan(host_root, service_names)
     health_check_plan_path = _write_health_check_plan(host_root, service_names, install_receipt)
     verification = verify_promoted_target(host_root)
 
@@ -281,6 +313,7 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
             "service_names": service_names,
             "upgrade_diff": upgrade_diff,
             "command_plan_path": str(command_plan_path),
+            "ubuntu_apply_plan_path": str(ubuntu_apply_plan_path),
             "health_check_plan_path": str(health_check_plan_path),
             "verification_path": str(verification.report_path),
             "install_receipt": install_receipt,
@@ -309,6 +342,7 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
         mode=mode,
         upgrade_diff=upgrade_diff,
         command_plan_path=command_plan_path,
+        ubuntu_apply_plan_path=ubuntu_apply_plan_path,
         health_check_plan_path=health_check_plan_path,
         verification_path=verification.report_path,
         receipt_path=receipt_path,

@@ -76,6 +76,7 @@ def test_promote_and_rollback_target_root(tmp_path):
     assert promotion.mode == "first_apply"
     assert promotion.upgrade_diff["added"] == ["jellyfin"]
     assert promotion.command_plan_path.exists()
+    assert promotion.ubuntu_apply_plan_path.exists()
     assert promotion.health_check_plan_path.exists()
     assert promotion.verification_path.exists()
 
@@ -86,6 +87,9 @@ def test_promote_and_rollback_target_root(tmp_path):
     command_plan = promotion.command_plan_path.read_text(encoding="utf-8")
     assert "systemctl daemon-reload" in command_plan
     assert "systemctl enable" in command_plan
+    ubuntu_apply_plan = promotion.ubuntu_apply_plan_path.read_text(encoding="utf-8")
+    assert "sudo rsync -a --delete" in ubuntu_apply_plan
+    assert "sudo systemctl daemon-reload" in ubuntu_apply_plan
     health_plan = json.loads(promotion.health_check_plan_path.read_text(encoding="utf-8"))
     checks_by_service = {item["service"]: item["health_check"] for item in health_plan["checks"]}
     assert checks_by_service["jellyfin"]["kind"] == "http"
