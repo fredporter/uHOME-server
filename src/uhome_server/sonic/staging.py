@@ -140,6 +140,15 @@ def _write_install_receipt(
             "dry_run": opts.dry_run,
             "ready": plan.ready,
             "component_ids": [component.component_id for component in manifest.components],
+            "components": [
+                {
+                    "component_id": component.component_id,
+                    "version": component.version,
+                    "install_target": component.install_target,
+                    "artifact_path": component.artifact_path,
+                }
+                for component in manifest.components
+            ],
         },
     )
 

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from uhome_server.config import utc_now_iso_z
+from uhome_server.sonic.linux_assets import service_asset
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> Path:
@@ -31,7 +32,9 @@ class PromotionResult:
     snapshot_root: Path
     promoted_paths: list[str]
     mode: str
+    upgrade_diff: dict[str, Any]
     command_plan_path: Path
+    health_check_plan_path: Path
     verification_path: Path
     receipt_path: Path
     state_path: Path
@@ -43,7 +46,9 @@ class PromotionResult:
             "snapshot_root": str(self.snapshot_root),
             "promoted_paths": self.promoted_paths,
             "mode": self.mode,
+            "upgrade_diff": self.upgrade_diff,
             "command_plan_path": str(self.command_plan_path),
+            "health_check_plan_path": str(self.health_check_plan_path),
             "verification_path": str(self.verification_path),
             "receipt_path": str(self.receipt_path),
             "state_path": str(self.state_path),
@@ -133,6 +138,69 @@ def _write_command_plan(host_root: Path, service_names: list[str]) -> Path:
     return plan_path
 
 
+def _component_versions(payload: dict[str, Any] | None) -> dict[str, str]:
+    if not isinstance(payload, dict):
+        return {}
+    components = payload.get("components", [])
+    if not isinstance(components, list):
+        return {}
+    result: dict[str, str] = {}
+    for item in components:
+        if not isinstance(item, dict):
+            continue
+        component_id = str(item.get("component_id") or "").strip()
+        version = str(item.get("version") or "").strip()
+        if component_id:
+            result[component_id] = version
+    return result
+
+
+def _compute_upgrade_diff(previous_receipt: dict[str, Any] | None, install_receipt: dict[str, Any]) -> dict[str, Any]:
+    previous_versions = _component_versions(previous_receipt.get("install_receipt") if isinstance(previous_receipt, dict) else None)
+    current_versions = _component_versions(install_receipt)
+    added = sorted(component for component in current_versions if component not in previous_versions)
+    removed = sorted(component for component in previous_versions if component not in current_versions)
+    changed = sorted(
+        component
+        for component in current_versions
+        if component in previous_versions and current_versions[component] != previous_versions[component]
+    )
+    unchanged = sorted(
+        component
+        for component in current_versions
+        if component in previous_versions and current_versions[component] == previous_versions[component]
+    )
+    return {
+        "added": added,
+        "removed": removed,
+        "changed": changed,
+        "unchanged": unchanged,
+        "previous_versions": previous_versions,
+        "current_versions": current_versions,
+    }
+
+
+def _write_health_check_plan(host_root: Path, service_names: list[str], install_receipt: dict[str, Any]) -> Path:
+    install_root = str(install_receipt.get("install_root", "/opt/uhome"))
+    checks = []
+    for service_name in service_names:
+        asset = service_asset(service_name, install_root)
+        checks.append(
+            {
+                "service": service_name,
+                "health_check": asset.health_check,
+            }
+        )
+    return _write_json(
+        host_root / "var" / "lib" / "uhome" / "health-check-plan.json",
+        {
+            "generated_at": utc_now_iso_z(),
+            "service_count": len(service_names),
+            "checks": checks,
+        },
+    )
+
+
 def verify_promoted_target(host_root: Path) -> VerificationResult:
     service_root = host_root / "etc" / "systemd" / "system"
     env_root = host_root / "etc" / "uhome"
@@ -191,12 +259,14 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
         promoted_paths.append(str(destination))
 
     service_names = _service_names_from_target(target_root)
-    command_plan_path = _write_command_plan(host_root, service_names)
-    verification = verify_promoted_target(host_root)
     target_install_receipt = target_root / "receipts" / "install-receipt.json"
     target_install_state = target_root / "state" / "install-state.json"
     install_receipt = _read_json(target_install_receipt) if target_install_receipt.exists() else {}
     install_state = _read_json(target_install_state) if target_install_state.exists() else {}
+    upgrade_diff = _compute_upgrade_diff(prior_receipt, install_receipt)
+    command_plan_path = _write_command_plan(host_root, service_names)
+    health_check_plan_path = _write_health_check_plan(host_root, service_names, install_receipt)
+    verification = verify_promoted_target(host_root)
 
     receipt_path = _write_json(
         host_root / "var" / "lib" / "uhome" / "promotion-receipt.json",
@@ -209,7 +279,9 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
             "promoted_paths": promoted_paths,
             "previous_receipt": prior_receipt,
             "service_names": service_names,
+            "upgrade_diff": upgrade_diff,
             "command_plan_path": str(command_plan_path),
+            "health_check_plan_path": str(health_check_plan_path),
             "verification_path": str(verification.report_path),
             "install_receipt": install_receipt,
             "install_state": install_state,
@@ -225,6 +297,7 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
             "snapshot_root": str(snapshot_root),
             "promoted_paths": promoted_paths,
             "service_names": service_names,
+            "upgrade_diff": upgrade_diff,
             "verification_ok": verification.ok,
         },
     )
@@ -234,7 +307,9 @@ def promote_target_root(target_root: Path, host_root: Path) -> PromotionResult:
         snapshot_root=snapshot_root,
         promoted_paths=promoted_paths,
         mode=mode,
+        upgrade_diff=upgrade_diff,
         command_plan_path=command_plan_path,
+        health_check_plan_path=health_check_plan_path,
         verification_path=verification.report_path,
         receipt_path=receipt_path,
         state_path=state_path,

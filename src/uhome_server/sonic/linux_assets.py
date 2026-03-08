@@ -17,6 +17,7 @@ class LinuxServiceAsset:
     wanted_by: str = "multi-user.target"
     working_directory_var: str = "UHOME_INSTALL_ROOT"
     restart: str = "on-failure"
+    health_check: dict[str, str] | None = None
 
 
 def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
@@ -31,6 +32,11 @@ def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
                 "UHOME_INSTALL_ROOT": install_root,
                 "JELLYFIN_DATA_DIR": f"{install_root}/var/jellyfin",
             },
+            health_check={
+                "kind": "http",
+                "target": "http://127.0.0.1:8096/health",
+                "command": "curl --fail --silent http://127.0.0.1:8096/health",
+            },
         ),
         "comskip": LinuxServiceAsset(
             service_name="comskip",
@@ -41,6 +47,11 @@ def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
             environment={
                 "UHOME_INSTALL_ROOT": install_root,
                 "COMSKIP_INI": f"{install_root}/etc/comskip.ini",
+            },
+            health_check={
+                "kind": "process",
+                "target": "comskip",
+                "command": "systemctl is-active comskip",
             },
         ),
         "uhome-dvr": LinuxServiceAsset(
@@ -54,6 +65,11 @@ def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
                 "PYTHONPATH": f"{install_root}/src",
                 "UHOME_RUNTIME_MODE": "dvr",
             },
+            health_check={
+                "kind": "http",
+                "target": "http://127.0.0.1:8000/api/runtime/ready",
+                "command": "curl --fail --silent http://127.0.0.1:8000/api/runtime/ready",
+            },
         ),
         "uhome-ha-bridge": LinuxServiceAsset(
             service_name="uhome-ha-bridge",
@@ -65,6 +81,11 @@ def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
                 "UHOME_INSTALL_ROOT": install_root,
                 "PYTHONPATH": f"{install_root}/src",
                 "HA_BRIDGE_ENABLED": "true",
+            },
+            health_check={
+                "kind": "http",
+                "target": "http://127.0.0.1:8123/health",
+                "command": "curl --fail --silent http://127.0.0.1:8123/health",
             },
         ),
         "uhome-kiosk": LinuxServiceAsset(
@@ -78,6 +99,11 @@ def _default_assets(install_root: str) -> dict[str, LinuxServiceAsset]:
                 "UHOME_PRESENTATION_MODE": "steam-console",
             },
             wanted_by="graphical.target",
+            health_check={
+                "kind": "process",
+                "target": "steam",
+                "command": "systemctl is-active uhome-kiosk",
+            },
         ),
     }
 

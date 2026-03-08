@@ -92,7 +92,8 @@ including environment files under `etc/uhome/`, systemd unit files under
 `apply-target` promotes those generated assets into a host-style filesystem
 layout under the chosen host root and snapshots the previous state for
 `rollback-target`. It also writes a `systemctl` command plan and verification
-report under `var/lib/uhome/`.
+report under `var/lib/uhome/`, plus a health-check plan and upgrade diff based
+on prior receipts.
 
 Example installer probes and verifiable sample bundles live under
 `examples/installer/`, including standalone Linux and dual-boot reference

@@ -73,7 +73,9 @@ def test_promote_and_rollback_target_root(tmp_path):
     assert (host_root / "etc" / "systemd" / "system" / "jellyfin.service").exists()
     assert promotion.receipt_path.exists()
     assert promotion.mode == "first_apply"
+    assert promotion.upgrade_diff["added"] == ["jellyfin"]
     assert promotion.command_plan_path.exists()
+    assert promotion.health_check_plan_path.exists()
     assert promotion.verification_path.exists()
 
     promoted_env = (host_root / "etc" / "uhome" / "jellyfin.env").read_text(encoding="utf-8")
@@ -83,6 +85,9 @@ def test_promote_and_rollback_target_root(tmp_path):
     command_plan = promotion.command_plan_path.read_text(encoding="utf-8")
     assert "systemctl daemon-reload" in command_plan
     assert "systemctl enable" in command_plan
+    health_plan = json.loads(promotion.health_check_plan_path.read_text(encoding="utf-8"))
+    checks_by_service = {item["service"]: item["health_check"] for item in health_plan["checks"]}
+    assert checks_by_service["jellyfin"]["kind"] == "http"
 
     rollback = rollback_promoted_target(host_root)
     restored_env = (host_root / "etc" / "uhome" / "jellyfin.env").read_text(encoding="utf-8")
@@ -111,3 +116,4 @@ def test_promote_target_root_detects_reapply(tmp_path):
     second = promote_target_root(target_root, host_root)
     assert first.mode == "first_apply"
     assert second.mode == "reapply"
+    assert second.upgrade_diff["unchanged"] == ["jellyfin"]

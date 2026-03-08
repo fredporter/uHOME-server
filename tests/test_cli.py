@@ -216,3 +216,5 @@ def test_installer_apply_and_rollback_cli(tmp_path):
     verify_payload = json.loads(verify_output.read_text(encoding="utf-8"))
     assert verify_payload["success"] is True
     assert verify_payload["result"]["checks"]["service_units"]["ok"] is True
+    apply_receipt = json.loads(apply_output.read_text(encoding="utf-8"))
+    assert apply_receipt["result"]["upgrade_diff"]["added"] == ["jellyfin"]
