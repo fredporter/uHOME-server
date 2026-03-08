@@ -105,3 +105,34 @@ def test_installer_verify_bundle_cli_missing_manifest(tmp_path):
     assert code == 1
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["valid"] is False
+
+
+def test_installer_stage_cli(tmp_path):
+    probe_path = tmp_path / "probe.json"
+    bundle_dir = tmp_path / "bundle"
+    stage_dir = tmp_path / "stage"
+    _write_probe(probe_path)
+    _write_bundle(bundle_dir)
+    output_path = tmp_path / "stage-output.json"
+    code = installer_main(
+        [
+            "stage",
+            "--bundle-dir",
+            str(bundle_dir),
+            "--probe",
+            str(probe_path),
+            "--stage-dir",
+            str(stage_dir),
+            "--enable-ha-bridge",
+            "--output",
+            str(output_path),
+        ]
+    )
+    assert code == 0
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["ready"] is True
+    assert (stage_dir / "install-plan.json").exists()
+    assert (stage_dir / "install-receipt.json").exists()
+    assert (stage_dir / "install-state.json").exists()
+    assert (stage_dir / "config" / "uhome.json").exists()
+    assert (stage_dir / "components" / "jellyfin" / "payload.tar.gz").exists()

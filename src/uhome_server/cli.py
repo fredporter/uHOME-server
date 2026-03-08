@@ -10,6 +10,7 @@ from typing import Any
 
 from uhome_server.config import get_repo_root
 from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
+from uhome_server.sonic.staging import stage_install_artifacts
 from uhome_server.sonic.uhome_bundle import read_bundle_manifest, verify_bundle
 from uhome_server.sonic.uhome_installer import UHOMEInstallOptions, build_uhome_install_plan
 from uhome_server.sonic.uhome_preflight import preflight_check
@@ -94,6 +95,21 @@ def installer_main(argv: list[str] | None = None) -> int:
     plan_parser.add_argument("--dry-run", action="store_true", help="Mark the plan as a dry run.")
     plan_parser.add_argument("--output", help="Optional path to write the JSON result.")
 
+    stage_parser = subparsers.add_parser("stage", help="Materialize a staged installer directory.")
+    stage_parser.add_argument("--bundle-dir", required=True, help="Directory containing uhome-bundle.json.")
+    stage_parser.add_argument("--probe", required=True, help="Path to a hardware probe JSON object.")
+    stage_parser.add_argument("--stage-dir", required=True, help="Output directory for staged artifacts.")
+    stage_parser.add_argument("--install-root", default="/opt/uhome", help="Install root used for the staged artifacts.")
+    stage_parser.add_argument("--kiosk-user", default="uhome", help="Autologin kiosk user.")
+    stage_parser.add_argument("--enable-ha-bridge", action="store_true", help="Enable Home Assistant bridge config artifacts.")
+    stage_parser.add_argument(
+        "--disable-autologin-kiosk",
+        action="store_true",
+        help="Skip kiosk autologin enablement artifacts.",
+    )
+    stage_parser.add_argument("--dry-run", action="store_true", help="Mark the generated plan as a dry run.")
+    stage_parser.add_argument("--output", help="Optional path to write the JSON result.")
+
     args = parser.parse_args(argv)
 
     if args.command == "preflight":
@@ -126,6 +142,27 @@ def installer_main(argv: list[str] | None = None) -> int:
         plan = build_uhome_install_plan(bundle_dir, _read_json(args.probe), opts)
         _write_output(plan.to_dict(), args.output)
         return 0 if plan.ready else 1
+
+    if args.command == "stage":
+        opts = UHOMEInstallOptions(
+            install_root=args.install_root,
+            enable_autologin_kiosk=not args.disable_autologin_kiosk,
+            kiosk_user=args.kiosk_user,
+            enable_ha_bridge=args.enable_ha_bridge,
+            dry_run=args.dry_run,
+        )
+        try:
+            plan, staged = stage_install_artifacts(
+                bundle_dir,
+                Path(args.stage_dir).expanduser().resolve(),
+                _read_json(args.probe),
+                opts,
+            )
+        except ValueError as exc:
+            _write_output({"ready": False, "error": str(exc)}, args.output)
+            return 1
+        _write_output({"ready": plan.ready, "plan": plan.to_dict(), "staged": staged.to_dict()}, args.output)
+        return 0
 
     parser.error(f"Unsupported installer command: {args.command}")
     return 2

@@ -77,7 +77,12 @@ uhome launcher status
 uhome-launcher start --presentation thin-gui
 uhome-installer preflight --probe ./probe.json
 uhome-installer plan --bundle-dir ./bundle --probe ./probe.json --output ./install-plan.json
+uhome-installer stage --bundle-dir ./bundle --probe ./probe.json --stage-dir ./stage
 ```
+
+Example installer probes and verifiable sample bundles live under
+`examples/installer/`, including standalone Linux and dual-boot reference
+bundles.
 
 ## License
 

@@ -34,3 +34,30 @@ Each release build should publish:
 - Keep release notes aligned with `docs/STATUS.md`.
 - When targeting `uHOME`, document whether the image exposes thin GUI,
   Steam-console UX, or both.
+
+## Repo-Local Staging Examples
+
+This repo now includes example staged-installer inputs under:
+
+- `examples/installer/probes/standalone-linux.json`
+- `examples/installer/probes/dual-boot-steam-node.json`
+- `examples/installer/bundles/standalone/`
+- `examples/installer/bundles/dual-boot/`
+
+To materialize a staged install directory from the standalone example:
+
+```bash
+uhome-installer stage \
+  --bundle-dir ./examples/installer/bundles/standalone \
+  --probe ./examples/installer/probes/standalone-linux.json \
+  --stage-dir ./tmp/uhome-stage-standalone
+```
+
+The staged output includes:
+
+- copied component payloads
+- `install-plan.json`
+- `install-receipt.json`
+- `install-state.json`
+- generated config payloads
+- rollback metadata when a rollback record or token is present
