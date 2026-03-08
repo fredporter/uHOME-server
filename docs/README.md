@@ -36,6 +36,10 @@ documentation tied to the real repo.
   Information Architecture deliverables
 - [PHASE-2-CHECKLIST.md](architecture/PHASE-2-CHECKLIST.md) for the completed
   installer-boundary cleanup inside `uHOME-server`
+- [PHASE-3-CHECKLIST.md](architecture/PHASE-3-CHECKLIST.md) for the completed
+  decentralized LAN-model milestone
+- [PHASE-3-LAN-KICKOFF.md](architecture/PHASE-3-LAN-KICKOFF.md) for the
+  kickoff and boundary notes for the LAN-model phase
 - [REPO-FAMILY.md](pathway/REPO-FAMILY.md) for family-boundary and companion-repo rules
 - the deprecated `uhome_server.sonic` namespace is compatibility-only; new
   repo-local work should use `uhome_server.installer`

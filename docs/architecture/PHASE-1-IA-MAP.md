@@ -1,6 +1,6 @@
 # Phase 1 Information Architecture Map
 
-Status: active
+Status: complete
 Scope: education-facing repo scaffold without runtime relocation
 
 ## Goal
@@ -35,7 +35,7 @@ phase.
 | `src/uhome_server/routes/dashboard.py` and `docs/ui/UHOME-DASHBOARD.md` | `apps/dashboard/` | `uHOME-server` | Server summary contract stays in `src/` for now. |
 | `src/uhome_server/routes/platform.py` and `src/uhome_server/services/uhome_presentation_service.py` | `apps/tablet-kiosk/`, `modules/steam-surface/`, `services/launcher/` | `uHOME-server` | Presentation control remains server-owned. |
 | `src/uhome_server/services/home_assistant/`, `src/uhome_server/services/home_assistant_service.py`, and `src/uhome_server/routes/home_assistant.py` | `modules/home-assistant-bridge/` and `services/bridge/` | `uHOME-server` | Clear module plus service split already exists. |
-| `src/uhome_server/cluster/registry.py` and `src/uhome_server/routes/network.py` | `services/lan-discovery/` | `uHOME-server` | Current topology registry is a file-backed scaffold. |
+| `src/uhome_server/cluster/registry.py` and `src/uhome_server/routes/network.py` | `services/lan-discovery/` | `uHOME-server` | File-backed LAN contract is now explicit; durable identity and orchestration remain future work. |
 | `src/uhome_server/services/uhome_command_handlers.py`, `src/uhome_server/routes/library.py`, and `src/uhome_server/routes/containers.py` | `modules/media/` and `services/playback/` | `uHOME-server` | Playback and media surfaces need cleaner service separation later. |
 | file-backed DVR scheduling and future jobs | `modules/dvr/` and `services/scheduling/` | `uHOME-server` | Durable scheduling backend remains future work. |
 | `defaults/workspace/` | `config/` support lane | shared with `uDOS` | Keep workspace compatibility while the checked-in config root grows. |
@@ -77,7 +77,7 @@ Own:
 
 - Android, TV, and other device-native client implementations
 
-## Immediate Next Steps
+## Ongoing Follow-Through
 
 1. Keep expanding the course and vault scaffolds until they can support concrete
    lessons.

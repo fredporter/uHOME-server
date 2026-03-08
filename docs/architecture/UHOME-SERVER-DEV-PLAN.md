@@ -71,7 +71,22 @@ Outcome:
 - `uhome_server.installer` is the active repo-local installer surface
 - `uhome_server.sonic` is deprecated compatibility-only
 
-### Phase 3+: Runtime And Product Work
+### Phase 3: Decentralized LAN Model
+
+Status: complete
+
+Anchor docs:
+
+- `docs/architecture/PHASE-3-LAN-KICKOFF.md`
+- `docs/architecture/PHASE-3-CHECKLIST.md`
+
+Outcome:
+
+- topology, primary authority, partial availability, and aggregated
+  library-availability contracts are now explicit in the repo-local network
+  surface
+
+### Phase 4+: Runtime And Product Work
 
 Status: active backlog
 
@@ -81,12 +96,10 @@ Anchor doc:
 
 This is the active delivery track after the repo-structure work:
 
-1. Runtime hardening
-2. Media and job core
-3. Decentralized LAN model
-4. Install and host profiles
-5. Living-room and client integration
-6. Operational maturity
+1. Media and job core
+2. Install and host profiles
+3. Living-room and client integration
+4. Operational maturity
 
 ## Working Rules
 

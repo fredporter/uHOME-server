@@ -28,7 +28,13 @@ def _client(monkeypatch) -> TestClient:
     monkeypatch.setattr(
         mod,
         "_network_status",
-        lambda: {"nodes": {"count": 2, "online": 1}, "volumes": {"count": 4, "online": 3}},
+        lambda: {
+            "status": "degraded",
+            "issues": ["offline_volumes_present"],
+            "nodes": {"count": 2, "online": 1},
+            "volumes": {"count": 4, "online": 3},
+            "library_index": {"healthy": 1, "degraded": 1, "offline": 0},
+        },
     )
     monkeypatch.setattr(
         mod,
@@ -60,6 +66,7 @@ def test_dashboard_summary_shape(monkeypatch):
     assert set(body["subsystems"].keys()) == {"ha_bridge", "workspace_runtime", "network", "library"}
     assert body["workspace_runtime"]["components"]["uhome"]["defaults"]["presentation"]["value"] == "thin-gui"
     assert body["subsystems"]["network"]["nodes"]["count"] == 2
+    assert body["subsystems"]["network"]["status"] == "degraded"
 
 
 def test_dashboard_summary_degraded(monkeypatch):
@@ -67,7 +74,17 @@ def test_dashboard_summary_degraded(monkeypatch):
 
     monkeypatch.setattr(mod, "_ha_status", lambda: (_ for _ in ()).throw(RuntimeError("bridge down")))
     monkeypatch.setattr(mod, "_workspace_runtime_status", lambda: {"workspace_ref": "@memory/workspace/settings"})
-    monkeypatch.setattr(mod, "_network_status", lambda: {"nodes": {"count": 0, "online": 0}, "volumes": {"count": 0, "online": 0}})
+    monkeypatch.setattr(
+        mod,
+        "_network_status",
+        lambda: {
+            "status": "offline",
+            "issues": ["no_nodes_registered"],
+            "nodes": {"count": 0, "online": 0},
+            "volumes": {"count": 0, "online": 0},
+            "library_index": {"healthy": 0, "degraded": 0, "offline": 0},
+        },
+    )
     monkeypatch.setattr(mod, "_library_status", lambda: {"count": 0, "entries": []})
 
     app = FastAPI()

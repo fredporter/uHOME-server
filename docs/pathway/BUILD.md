@@ -11,7 +11,9 @@ on the cross-repo family model.
 4. `docs/architecture/PHASE-1-IA-MAP.md`
 5. `docs/architecture/ROOT-POLICY.md`
 6. `docs/pathway/REPO-FAMILY.md`
-7. `src/uhome_server/`
+7. `docs/architecture/PHASE-3-LAN-KICKOFF.md`
+8. `docs/architecture/PHASE-3-CHECKLIST.md`
+9. `src/uhome_server/`
 
 ## Active Build Rules
 
@@ -27,5 +29,6 @@ on the cross-repo family model.
 - remove remaining repo-local references to the deprecated
   `uhome_server.sonic` namespace
 - keep growing vault-backed examples
-- replace placeholder file-backed scheduling and topology scaffolds with durable
-  implementations when the ownership is clear
+- replace placeholder file-backed scheduling behavior with a durable backend
+- broaden storage identity and recovery rules beyond the current file-backed LAN
+  contract

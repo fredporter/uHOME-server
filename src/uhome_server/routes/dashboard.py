@@ -6,7 +6,12 @@ from typing import Any, Callable, Optional
 
 from fastapi import APIRouter, Depends
 
-from uhome_server.cluster.registry import get_node_registry, get_storage_registry
+from uhome_server.cluster.registry import (
+    build_library_index,
+    get_node_registry,
+    get_storage_registry,
+    summarize_topology,
+)
 from uhome_server.config import utc_now_iso_z
 from uhome_server.library.catalog import get_container_catalog_service
 from uhome_server.services.home_assistant_service import get_ha_service
@@ -58,9 +63,14 @@ def _network_status() -> dict[str, Any]:
     volumes = get_storage_registry().list_volumes()
     online_nodes = [node for node in nodes if node.get("status") == "online"]
     online_volumes = [volume for volume in volumes if volume.get("status") == "online"]
+    topology = summarize_topology(nodes, volumes)
+    library_index = build_library_index(nodes, volumes)
     return {
+        "status": topology["status"],
+        "issues": topology["issues"],
         "nodes": {"count": len(nodes), "online": len(online_nodes)},
         "volumes": {"count": len(volumes), "online": len(online_volumes)},
+        "library_index": library_index["summary"],
     }
 
 

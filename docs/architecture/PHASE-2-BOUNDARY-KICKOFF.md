@@ -25,9 +25,9 @@ Phase 2 outcome:
 - `src/uhome_server/sonic/` is now the deprecated legacy compatibility layer
 - staged service manifests now drive execution and promotion flows
 
-The next concrete cleanup is to keep the service registry in staging and pass a
-staged service manifest forward into execution and promotion, so generic
-host-apply steps no longer need hard-coded `uHOME` service lookup rules.
+That staging-to-promotion cleanup is complete: the staged service manifest now
+drives execution and promotion so generic host-apply steps no longer depend on
+hard-coded `uHOME` service lookup rules.
 
 ## Why This Phase Is Complete
 

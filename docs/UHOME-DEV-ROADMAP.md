@@ -54,9 +54,11 @@ Build `uHOME Server` into the canonical Linux-side home-profile runtime:
 - migrated `uHOME` decisions, specs, and service docs
 
 ### Current limitations
-- storage and node registries are file-backed scaffolds, not full orchestration
+- storage and node registries now expose topology, authority, recovery, and
+  library-availability contracts, but they remain file-backed rather than full
+  orchestration
 - no authoritative failover or election model yet
-- no real distributed library indexing or replication layer yet
+- no rich distributed library indexing or replication layer yet
 - no packaged production deployment flow yet
 - no repo-local frontend client implementation yet
 
@@ -95,6 +97,8 @@ Exit criteria:
 ## Phase 3: Decentralized LAN Model
 
 Goal: turn the multi-server/storage vision into an actual operating model.
+
+Status: complete
 
 Deliverables:
 - node capability advertisement and discovery contract
@@ -165,9 +169,8 @@ Exit criteria:
 
 ## Near-Term Backlog
 
-- add CI and dependency lockfiles
-- add registry persistence tests beyond route coverage
-- define node authority states and transitions
+- add dependency lockfiles
+- broaden node authority states and transitions beyond current primary handoff
 - define storage volume identity rules beyond mount paths
 - add Jellyfin integration tests and configuration docs
 - define API contract for downstream TV/mobile clients

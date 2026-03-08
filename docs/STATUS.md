@@ -1,22 +1,23 @@
 # uHOME Server Status
 
-Status: active migration
-Updated: 2026-03-07
+Status: active standalone runtime
+Updated: 2026-03-09
 
 ## Summary
 
-The standalone `uHOME Server` repository now contains the first extracted
-service and contract modules migrated from `uDOS`.
+The standalone `uHOME Server` repository now has its own repo structure,
+installer boundary, and decentralized LAN-model contract in place.
 
 ## Current Focus
 
-- stabilize the extracted Home Assistant and presentation API surfaces
-- preserve the migrated Sonic install/bundle contracts
-- continue moving `uHOME`-owned docs and runtime code out of `uDOS`
+- extend the home-media runtime beyond scaffolded DVR and playback behavior
+- keep the standalone server package reliable and locally bootable
+- preserve clear repo boundaries between `uHOME-server`, `uDOS`, and
+  companion repos
 
 ## Next Steps
 
-- add dependency lockfiles and CI for the standalone package
-- migrate any remaining `uHOME`-owned runtime modules that no longer belong in `uDOS`
-- replace file-backed placeholders with durable service storage where needed
+- add dependency lockfiles for the standalone package
+- replace file-backed scheduling behavior with a durable backend
+- broaden storage identity and recovery rules beyond current registry records
 - document deployment, packaging, and release flows for standalone installs
