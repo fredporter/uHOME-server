@@ -8,16 +8,23 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from uhome_server.backup import create_backup, list_backups, restore_backup
 from uhome_server.config import get_repo_root
+from uhome_server.installer.bundle import read_bundle_manifest, verify_bundle
+from uhome_server.installer.executor import execute_staged_install
 from uhome_server.installer.health import run_promoted_health_checks
 from uhome_server.installer.live_apply import run_ubuntu_apply_plan
-from uhome_server.installer.executor import execute_staged_install
-from uhome_server.installer.promotion import promote_target_root, rollback_promoted_target, verify_promoted_target
-from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
-from uhome_server.installer.staging import stage_install_artifacts
-from uhome_server.installer.bundle import read_bundle_manifest, verify_bundle
 from uhome_server.installer.plan import UHOMEInstallOptions, build_uhome_install_plan
 from uhome_server.installer.preflight import get_host_profile, preflight_check
+from uhome_server.installer.promotion import (
+    promote_target_root,
+    rollback_promoted_target,
+    verify_promoted_target,
+)
+from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.services.uhome_presentation_service import (
+    get_uhome_presentation_service,
+)
 
 
 def _read_json(path: str) -> dict[str, Any]:
@@ -268,16 +275,79 @@ def installer_main(argv: list[str] | None = None) -> int:
     return 2
 
 
+def backup_main(argv: list[str] | None = None) -> int:
+    """CLI for backup and restore operations."""
+    parser = argparse.ArgumentParser(prog="uhome-backup", description="Backup and restore uHOME Server state.")
+    parser.add_argument("--repo-root", help="Override the repository root.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Create backup command
+    create_parser = subparsers.add_parser("create", help="Create a new backup.")
+    create_parser.add_argument("--backup-dir", help="Directory to store backups (default: repo_root/backups).")
+    create_parser.add_argument(
+        "--no-workspace",
+        action="store_true",
+        help="Exclude workspace settings from backup.",
+    )
+    create_parser.add_argument("--output", help="Optional path to write JSON result.")
+
+    # List backups command
+    list_parser = subparsers.add_parser("list", help="List available backups.")
+    list_parser.add_argument("--backup-dir", help="Directory containing backups (default: repo_root/backups).")
+    list_parser.add_argument("--output", help="Optional path to write JSON result.")
+
+    # Restore backup command
+    restore_parser = subparsers.add_parser("restore", help="Restore from a backup.")
+    restore_parser.add_argument("--backup-path", required=True, help="Path to backup directory.")
+    restore_parser.add_argument("--dry-run", action="store_true", help="Validate backup without restoring.")
+    restore_parser.add_argument("--output", help="Optional path to write JSON result.")
+
+    args = parser.parse_args(argv)
+    repo_root = Path(args.repo_root).expanduser().resolve() if args.repo_root else get_repo_root()
+
+    if args.command == "create":
+        backup_dir = Path(args.backup_dir).expanduser().resolve() if args.backup_dir else None
+        result = create_backup(
+            repo_root=repo_root,
+            backup_dir=backup_dir,
+            include_workspace=not args.no_workspace,
+        )
+        _write_output(result.to_dict(), args.output)
+        return 0 if result.success else 1
+
+    if args.command == "list":
+        backup_dir = Path(args.backup_dir).expanduser().resolve() if args.backup_dir else repo_root / "backups"
+        backups = list_backups(backup_dir)
+        _write_output({"backups": backups, "count": len(backups)}, args.output)
+        return 0
+
+    if args.command == "restore":
+        backup_path = Path(args.backup_path).expanduser().resolve()
+        result = restore_backup(
+            backup_path=backup_path,
+            repo_root=repo_root,
+            dry_run=args.dry_run,
+        )
+        _write_output(result.to_dict(), args.output)
+        return 0 if result.success else 1
+
+    parser.error(f"Unsupported backup command: {args.command}")
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="uhome", description="uHOME operator CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("launcher", help="Manage local launcher state.")
     subparsers.add_parser("installer", help="Manage install plans and preflight.")
+    subparsers.add_parser("backup", help="Backup and restore server state.")
     args, remaining = parser.parse_known_args(argv)
     if args.command == "launcher":
         return launcher_main(remaining)
     if args.command == "installer":
         return installer_main(remaining)
+    if args.command == "backup":
+        return backup_main(remaining)
     parser.error(f"Unsupported command: {args.command}")
     return 2
 

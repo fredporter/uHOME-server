@@ -10,6 +10,8 @@ documentation tied to the real repo.
 
 ### Use
 
+- [../QUICKSTART.md](../QUICKSTART.md) for the fastest local run path
+- [../FIRST-TIME-INSTALL.md](../FIRST-TIME-INSTALL.md) for clean-machine setup
 - [USE.md](pathway/USE.md) for the current operator path
 - [UHOME-DASHBOARD.md](ui/UHOME-DASHBOARD.md) for the dashboard surface
 - [SONIC-STANDALONE-RELEASE-AND-INSTALL.md](howto/SONIC-STANDALONE-RELEASE-AND-INSTALL.md)

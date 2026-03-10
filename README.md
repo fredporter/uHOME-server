@@ -8,6 +8,27 @@ core and `uDOS-sonic`: `uDOS` owns the shared runtime and contracts,
 `uDOS-sonic` owns deployment and hardware bootstrap, and `uHOME-server` owns
 the home infrastructure runtime, examples, and pathway documentation.
 
+## Quick Start
+
+If you already have Python 3.9+ installed, this is the fastest way to run the API:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e '.[dev]'
+python -m uvicorn uhome_server.app:app --reload
+```
+
+In a second terminal:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+For a dedicated quick path, see `QUICKSTART.md`.
+For first-time machine setup, see `FIRST-TIME-INSTALL.md`.
+
 ## Pathway Contract
 
 Each repo in the family should answer the same questions in the same order.
@@ -59,6 +80,8 @@ status.
 
 Start here if you want to run or operate the current server:
 
+- `QUICKSTART.md` for a 5-minute local run path
+- `FIRST-TIME-INSTALL.md` for first-time setup on a clean machine
 - `README.md` for runtime overview and commands
 - `docs/pathway/USE.md` for the current operator path
 - `examples/installer/` for standalone and dual-boot bundle examples

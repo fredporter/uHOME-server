@@ -15,3 +15,11 @@ Rules:
 - client-native UX and packaging belong in separate repos
 - kiosk and dashboard contracts may be documented here even when no local UI is
   embedded in this repo
+
+Current client contracts:
+
+- `PLAYBACK-API.md` - playback status, handoff, and queue APIs
+- `LAUNCHER-API.md` - launcher session lifecycle APIs
+- `HOUSEHOLD-API.md` - household-safe browse and status APIs
+- `CLIENT-CAPABILITIES.md` - controller/remote/touch capability model
+- `INTEGRATION-GUIDE.md` - end-to-end integration guide for client teams

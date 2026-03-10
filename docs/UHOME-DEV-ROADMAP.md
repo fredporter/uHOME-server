@@ -1,7 +1,8 @@
 # uHOME Dev Roadmap
 
 Status: active
-Updated: 2026-03-09
+Updated: 2026-03-10
+Lead: AI Roadmap Manager
 Scope: standalone `uHOME Server` repository
 
 This roadmap is governed by:
@@ -133,6 +134,8 @@ Exit criteria:
 
 Goal: align server APIs and sessions with the real downstream clients.
 
+Status: active (started 2026-03-10)
+
 Deliverables:
 - stable server-side contract for Android, Google TV, and Apple TV clients
 - launcher/session APIs for remote-first living-room UX
@@ -146,19 +149,28 @@ Exit criteria:
 
 ## Phase 6: Operational Maturity
 
+Status: ~95% complete (started 2026-03-10, Session 2 completed 2026-03-10)
+
 Goal: make `uHOME Server` maintainable as its own public product.
 
 Deliverables:
-- deployment guide for Ubuntu-class hosts
-- operational runbooks for degraded storage and offline nodes
-- release process and versioning policy
-- backup/restore flow for config, registry, and library metadata
-- observability for job queue, node health, and storage health
+- ✅ deployment guide for Ubuntu-class hosts (11-phase guide + post-install validation)
+- ✅ operational runbooks for degraded storage and offline nodes (6 comprehensive runbooks)
+- ✅ release process and versioning policy (RELEASE-POLICY.md + CHANGELOG.md)
+- ✅ backup/restore flow for config, registry, and library metadata (CLI + 13 tests)
+- ✅ observability for job queue, node health, and storage health (health endpoints + guide)
 
 Exit criteria:
-- public releases are reproducible
-- operator recovery steps are documented
-- server state can be backed up and restored cleanly
+- ✅ public releases are reproducible (tagging workflow documented)
+- ✅ operator recovery steps are documented (6 runbooks with scenarios)
+- ✅ server state can be backed up and restored cleanly (uhome backup CLI)
+- ✅ health endpoints available for monitoring (3 endpoints: health, ready, debug)
+- ✅ all tests passing (131 tests, zero regressions)
+
+Deferred to future:
+- PyPI/Docker Hub publishing automation (manual process documented)
+- Terraform cloud deployment templates (optional)
+- Automated runbook validation tests (manual validation sufficient)
 
 ## Cross-Cutting Priorities
 
@@ -169,10 +181,11 @@ Exit criteria:
 - keep client apps downstream of server contracts rather than embedding them in
   this repo
 
-## Near-Term Backlog
-
-- add dependency lockfiles
+##~~add dependency lockfiles~~ ✓ completed 2026-03-10
+- ~~add Jellyfin integration tests and configuration docs~~ ✓ completed 2026-03-10
+- extract playback routes from Home Assistant command-handler scaffolding
 - broaden node authority states and transitions beyond current primary handoff
+- define storage volume identity rules beyond mount path current primary handoff
 - define storage volume identity rules beyond mount paths
 - add Jellyfin integration tests and configuration docs
 - define API contract for downstream TV/mobile clients

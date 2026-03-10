@@ -209,82 +209,29 @@ def _workspace_choice(
 
 
 def playback_status(params: dict[str, Any]) -> dict[str, Any]:
-    workspace_fields = _uhome_workspace_fields()
-    presentation_mode, presentation_mode_source = _workspace_choice(
-        workspace_fields, "presentation_mode", _DEFAULT_PRESENTATION_MODE, valid_values=_PRESENTATION_MODES
-    )
-    preferred_target_client, preferred_target_client_source = _workspace_choice(
-        workspace_fields, "preferred_target_client", _DEFAULT_TARGET_CLIENT
-    )
-    base_url = _jellyfin_base_url()
-    result: dict[str, Any] = {
-        "command": "uhome.playback.status",
-        "jellyfin_configured": bool(base_url),
-        "active_sessions": [],
-        "presentation_mode": presentation_mode,
-        "presentation_mode_source": presentation_mode_source,
-        "preferred_target_client": preferred_target_client,
-        "preferred_target_client_source": preferred_target_client_source,
-    }
-    if not base_url:
-        result["note"] = "Set JELLYFIN_URL to enable live playback status."
-        return result
+    """Legacy wrapper for Home Assistant bridge - delegates to playback service."""
+    from uhome_server.services.playback_service import get_playback_service
 
-    try:
-        api_key = str(_config.get("JELLYFIN_API_KEY", "") or "")
-        url = f"{base_url.rstrip('/')}/Sessions?api_key={api_key}"
-        with urllib.request.urlopen(url, timeout=3) as resp:
-            sessions = json.loads(resp.read())
-        active = [session for session in sessions if session.get("NowPlayingItem")]
-        result["active_sessions"] = [
-            {
-                "user": session.get("UserName"),
-                "title": session.get("NowPlayingItem", {}).get("Name"),
-                "media_type": session.get("NowPlayingItem", {}).get("Type"),
-                "client": session.get("Client"),
-            }
-            for session in active
-        ]
-        result["jellyfin_reachable"] = True
-    except Exception as exc:
-        result["jellyfin_reachable"] = False
-        result["issue"] = str(exc)
+    result = get_playback_service().get_status()
+    result["command"] = "uhome.playback.status"
     return result
 
 
 def playback_handoff(params: dict[str, Any]) -> dict[str, Any]:
-    item_id = str(params.get("item_id") or "").strip()
-    workspace_fields = _uhome_workspace_fields()
-    default_target, default_target_source = _workspace_choice(
-        workspace_fields, "preferred_target_client", _DEFAULT_TARGET_CLIENT
-    )
-    requested_target = str(params.get("target_client") or "").strip()
-    use_default_target = not requested_target or requested_target.lower() == "default"
-    target_client = default_target if use_default_target else requested_target
-    if not item_id:
-        return {"command": "uhome.playback.handoff", "success": False, "error": "item_id is required"}
+    """Legacy wrapper for Home Assistant bridge - delegates to playback service."""
+    from uhome_server.services.playback_service import get_playback_service
 
-    try:
-        queue = _load_json_list(_playback_queue_path())
-        queue.append(
-            {
-                "id": str(uuid.uuid4())[:8],
-                "item_id": item_id,
-                "target_client": target_client,
-                "queued_at": datetime.now(timezone.utc).isoformat(),
-                "params": {k: v for k, v in params.items() if k not in {"item_id", "target_client"}},
-            }
-        )
-        _save_json_list(_playback_queue_path(), queue)
-        return {
-            "command": "uhome.playback.handoff",
-            "success": True,
-            "item_id": item_id,
-            "target_client": target_client,
-            "source": default_target_source if use_default_target else "request",
-        }
-    except Exception as exc:
-        return {"command": "uhome.playback.handoff", "success": False, "error": str(exc)}
+    item_id = str(params.get("item_id") or "").strip()
+    target_client = str(params.get("target_client") or "").strip() or None
+    extra_params = {k: v for k, v in params.items() if k not in {"item_id", "target_client"}}
+
+    result = get_playback_service().handoff(
+        item_id=item_id,
+        target_client=target_client,
+        params=extra_params if extra_params else None,
+    )
+    result["command"] = "uhome.playback.handoff"
+    return result
 
 
 _HANDLERS = {
