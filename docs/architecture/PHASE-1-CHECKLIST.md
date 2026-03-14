@@ -19,8 +19,8 @@ Phase 1 goal:
   `config/`, and `scripts/` roots exist with README coverage
 - [x] root classification policy exists for canonical and transitional surfaces
 - [x] current-to-target mapping exists for the live runtime package
-- [x] repo family model exists for `uDOS`, `uHOME-server`, `uDOS-sonic`, and
-  downstream clients
+- [x] repo family model exists for `uDOS-core`, `uDOS-shell`, `uDOS-wizard`,
+  `uHOME-server`, `uDOS-sonic-screwdriver`, and downstream clients
 - [x] no-break policy is documented and keeps `src/uhome_server/` as the active
   implementation package
 

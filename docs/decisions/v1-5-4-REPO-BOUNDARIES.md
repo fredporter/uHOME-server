@@ -30,7 +30,7 @@ Current internal extension policy:
 Companion repos are not internal extensions even if they integrate tightly with uDOS.
 
 Current companion repo policy:
-- Sonic belongs in its own repository: `fredporter/uDOS-sonic`
+- Sonic belongs in its own repository: `fredporter/uDOS-sonic-screwdriver`
 - Sonic remains contract-compatible with Wizard and uDOS
 - Sonic should be consumed through pinned sync/vendor/import flows rather than git submodules
 - uDOS retains only the integration contract, loader hooks, and compatibility surface needed to interoperate with Sonic
@@ -108,6 +108,6 @@ Sonic should instead follow:
 ## Decision summary
 
 - keep Empire internal and Wizard-activated
-- move Sonic ownership to `uDOS-sonic`
+- move Sonic ownership to `uDOS-sonic-screwdriver`
 - keep `uHOME-server` separate
 - keep commercial macOS/Android/TV apps in separate private repos

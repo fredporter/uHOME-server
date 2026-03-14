@@ -5,7 +5,7 @@ Scope: education-facing repo scaffold without runtime relocation
 
 ## Goal
 
-Align `uHOME-server` with the shared `uDOS` family language:
+Align `uHOME-server` with the shared uDOS v2 family language:
 
 - `apps/`
 - `modules/`
@@ -38,22 +38,28 @@ phase.
 | `src/uhome_server/cluster/registry.py` and `src/uhome_server/routes/network.py` | `services/lan-discovery/` | `uHOME-server` | File-backed LAN contract is now explicit; durable identity and orchestration remain future work. |
 | `src/uhome_server/services/uhome_command_handlers.py`, `src/uhome_server/routes/library.py`, and `src/uhome_server/routes/containers.py` | `modules/media/` and `services/playback/` | `uHOME-server` | Playback and media surfaces need cleaner service separation later. |
 | file-backed DVR scheduling and future jobs | `modules/dvr/` and `services/scheduling/` | `uHOME-server` | Durable scheduling backend remains future work. |
-| `defaults/workspace/` | `config/` support lane | shared with `uDOS` | Keep workspace compatibility while the checked-in config root grows. |
+| `defaults/workspace/` | `config/` support lane | shared with `uDOS-core` and `uDOS-shell` | Keep workspace compatibility while the checked-in config root grows. |
 | `examples/installer/` and `src/uhome_server/installer/bundle.py` | transitional install-contract lane | `uHOME-server` | `uHOME`-specific bundle contracts stay here while the public installer boundary settles. |
 | `library/` | module/runtime support surface | `uHOME-server` | Keep as a runtime support root until a cleaner module ownership split is ready. |
 
 ## Repo Family Boundary
 
-### `uDOS`
+### `uDOS-core`
 
 Owns:
 
 - core runtime
-- Wizard
 - shared contracts
 - family-wide education framing
 
-### `uDOS-sonic`
+### `uDOS-shell` and `uDOS-wizard`
+
+Own:
+
+- interaction surfaces
+- provider and assist workflows
+
+### `uDOS-sonic-screwdriver`
 
 Owns:
 

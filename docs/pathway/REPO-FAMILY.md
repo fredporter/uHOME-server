@@ -14,18 +14,25 @@ order:
 2. What Markdown or vault surfaces does it read or write?
 3. What services does it expose?
 4. What modules are optional?
-5. How does it connect back to `uDOS` core?
+5. How does it connect back to `uDOS-core`?
 
 ## Family Roles
 
-### `uDOS`
+### `uDOS-core`
 
 Owns:
 
 - core runtime
 - shared contracts
-- Wizard and other main interaction surfaces
+- deterministic execution semantics
 - family-wide education framing
+
+### `uDOS-shell` and `uDOS-wizard`
+
+Own:
+
+- interactive shell and workspace surfaces
+- provider, network, MCP, and assist workflows
 
 ### `uHOME-server`
 
@@ -37,7 +44,7 @@ Owns:
 - household vault examples and learning path
 - `uHOME`-specific bundle and host-role contracts
 
-### `uDOS-sonic`
+### `uDOS-sonic-screwdriver`
 
 Owns:
 
@@ -54,18 +61,19 @@ Own:
 
 ## Boundary Rules
 
-- `uHOME-server` is not a second core runtime beside `uDOS`
+- `uHOME-server` is not a second core runtime beside `uDOS-core`
 - `uHOME-server` should not absorb generic deployment ownership that belongs in
-  `uDOS-sonic`
-- `uDOS-sonic` should not redefine `uHOME` runtime architecture
+  `uDOS-sonic-screwdriver`
+- `uDOS-sonic-screwdriver` should not redefine `uHOME` runtime architecture
 - client implementations should consume stable server contracts rather than
   being embedded in this repo
 
 ## Integration Contract
 
-`uHOME-server` connects back to `uDOS` through:
+`uHOME-server` connects back to `uDOS-core`, `uDOS-shell`, and `uDOS-wizard`
+through:
 
 - shared contracts and schemas
 - workspace defaults and compatibility surfaces
 - pathway documentation that uses the same architecture language
-- install examples that remain compatible with `uDOS-sonic`
+- install examples that remain compatible with `uDOS-sonic-screwdriver`

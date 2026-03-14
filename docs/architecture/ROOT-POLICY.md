@@ -36,4 +36,4 @@ have to infer which surfaces are canonical, transitional, or historical.
 - `defaults/`, `examples/`, and `library/` remain valid roots during the
   transition, but they must be explicitly documented whenever surfaced.
 - New generic deployment machinery should not land in `uHOME-server` if it
-  belongs in `uDOS-sonic`.
+  belongs in `uDOS-sonic-screwdriver`.

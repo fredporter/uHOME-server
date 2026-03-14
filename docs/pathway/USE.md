@@ -41,4 +41,4 @@ python3 -m venv .venv
 
 This repo owns the home-infrastructure runtime. It does not own generic
 deployment bootstrap as a product category. When install logic becomes generic
-or hardware-first, it should move toward `uDOS-sonic`.
+or hardware-first, it should move toward `uDOS-sonic-screwdriver`.

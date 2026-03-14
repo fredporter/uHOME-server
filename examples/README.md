@@ -4,8 +4,8 @@
 examples.
 
 Current contents focus on installer bundles and hardware probes that make the
-current server and `uDOS-sonic` integration testable without pretending those
-examples are the final course structure.
+current server and `uDOS-sonic-screwdriver` integration testable without
+pretending those examples are the final course structure.
 
 Current example lanes:
 

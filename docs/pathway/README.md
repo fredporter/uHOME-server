@@ -5,9 +5,10 @@
 
 The pathway framing should stay consistent with sibling repos:
 
-- `uDOS` = core runtime and shared contracts
-- `uDOS-sonic` = deployment and hardware bootstrap
+- `uDOS-core` = core runtime and shared contracts
+- `uDOS-shell` / `uDOS-wizard` = interaction and assist surfaces
+- `uDOS-sonic-screwdriver` = deployment and hardware bootstrap
 - `uHOME-server` = home infrastructure runtime and household service model
 
 This repo should not read like a second core and should not absorb generic
-deployment ownership that belongs in `uDOS-sonic`.
+deployment ownership that belongs in `uDOS-sonic-screwdriver`.
