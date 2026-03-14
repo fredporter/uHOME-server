@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Always-on local-network runtime for persistent services, scheduling, and home/server modules.
+Always-on Linux-based uHOME runtime for persistent local-network services,
+scheduling, Steam-server host duties, and local vault viewing or unlock
+surfaces.
 
 ## Ownership
 
@@ -10,12 +12,16 @@ Always-on local-network runtime for persistent services, scheduling, and home/se
 - persistent scheduling
 - service modules
 - home and server infrastructure surfaces
+- Linux-side Steam server host runtime
+- local Vault Reader and Beacon Activate offline-library surfaces
 
 ## Non-Goals
 
 - canonical runtime semantics
 - shell ownership
 - provider bridge ownership
+- Google or HubSpot sync orchestration owned by `uHOME-empire`
+- Apple or iCloud sync ownership owned by the macOS desktop app
 
 ## Spine
 
@@ -33,7 +39,9 @@ Build service modules as explicit, testable units and keep managed state outside
 
 ## Family Relation
 
-uHOME-server provides persistent local services that complement Core and Wizard.
+`uHOME-server` provides the always-on local runtime. It complements
+`uDOS-core`, pairs with `uDOS-wizard` for local networking contracts, and
+leaves Google or HubSpot sync workflows to `uHOME-empire`.
 
 ## Transitional Runtime Note
 

@@ -11,6 +11,7 @@ Topics:
 - scheduling
 - smart device control
 - bridge boundaries
+- local-first automation distinct from `uHOME-empire` online webhooks
 
 Repo anchors:
 
@@ -22,3 +23,8 @@ Repo anchors:
 First project:
 
 - implement a simple automation workflow over the sample vault
+
+Boundary note:
+
+- Home Assistant, Matter, and local device automation stay in `uHOME-server`
+- custom online APIs and webhook jobs belong in `uHOME-empire`

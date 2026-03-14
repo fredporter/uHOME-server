@@ -14,6 +14,8 @@ documentation tied to the real repo.
 - [../FIRST-TIME-INSTALL.md](../FIRST-TIME-INSTALL.md) for clean-machine setup
 - [USE.md](pathway/USE.md) for the current operator path
 - [UHOME-DASHBOARD.md](ui/UHOME-DASHBOARD.md) for the dashboard surface
+- [BEACON-ACTIVATE.md](clients/BEACON-ACTIVATE.md)
+  for local portal and vault-reader positioning
 - [SONIC-STANDALONE-RELEASE-AND-INSTALL.md](howto/SONIC-STANDALONE-RELEASE-AND-INSTALL.md)
   for release and install guidance
 

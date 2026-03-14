@@ -157,7 +157,7 @@ Rules:
 
 - managed scheduling and orchestration
 - home-node networking control
-- beacon and tunnel management
+- Beacon Activate and tunnel management
 - network-aware control-plane behavior
 - Home Assistant bridge
 - remote API surfaces
@@ -311,18 +311,18 @@ Wizard is the network control plane for `uHOME` nodes. For v1.5 this means:
 Current Wizard-owned network surfaces relevant to `uHOME`:
 
 - `/api/ha/*` for optional Home Assistant control integration
-- `/api/beacon/*` for beacon configuration, status, tunnel control, and local
-  cache surfaces
+- `/api/beacon/*` for Beacon Activate configuration, status, tunnel control,
+  and local cache surfaces
 - shared Wizard service ownership for network-aware orchestration and API access
 
-### Beacon and tunnel model
+### Beacon Activate and tunnel model
 
-Beacon support is a valid v1.5 network extension for `uHOME`, especially for
+Beacon Activate is a valid v1.5 network extension for `uHOME`, especially for
 home-node discovery, household edge nodes, and constrained local deployments.
 
 Rules:
 
-- beacons are Wizard-owned network surfaces
+- Beacon Activate is a Wizard-owned network surface
 - Sonic may provision a node that participates in beacon-managed networking, but
   it must not own beacon runtime behavior
 - beacon and tunnel state must remain optional for baseline LAN-local `uHOME`

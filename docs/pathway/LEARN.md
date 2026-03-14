@@ -16,6 +16,8 @@ home infrastructure pathway in the wider `uDOS` family.
 - LAN discovery and multi-node topology
 - media and automation as teachable module families
 - server contracts separated from native client-app repos
+- online webhook and API automation belongs in `uHOME-empire`, not the local
+  home-automation lane
 
 ## Reference Docs
 
@@ -29,3 +31,4 @@ home infrastructure pathway in the wider `uDOS` family.
 2. `courses/02-media-infrastructure/`
 3. `courses/03-home-automation/`
 4. `courses/04-multi-device-systems/`
+5. `courses/05-configurable-webhook-server/`
