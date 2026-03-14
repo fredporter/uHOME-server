@@ -1,0 +1,9 @@
+[project]
+name = "uhome-server"
+version = "0.2.0"
+description = "uHOME server kernel starter"
+requires-python = ">=3.11"
+dependencies = ["fastapi", "uvicorn"]
+
+[project.scripts]
+uhome-server = "uhome.main:run"
