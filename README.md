@@ -38,6 +38,8 @@ surfaces.
 ## Local Development
 
 Build service modules as explicit, testable units and keep managed state outside the repo.
+Use `QUICKSTART.md` for the first runnable path and use
+`examples/basic-uhome-server-session.md` for the smallest standalone smoke.
 
 ## Family Relation
 
@@ -68,19 +70,20 @@ For the base/runtime boundary itself, see `docs/base-runtime-boundary.md`.
 ## Quick Start
 
 ```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install --upgrade pip setuptools wheel
-.venv/bin/python -m pip install -e '.[dev]'
-.venv/bin/python -m uvicorn uhome_server.app:app --reload
+bash scripts/run-uhome-server-checks.sh
+.venv/bin/python -m uvicorn uhome_server.app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 In another terminal:
 
 ```bash
 curl http://localhost:8000/api/health
+curl http://localhost:8000/api/runtime/ready
 ```
 
-For machine setup and operational details, see `QUICKSTART.md`, `FIRST-TIME-INSTALL.md`, and the legacy documentation preserved under `docs/`.
+For the full runtime, Wizard pairing, and Empire bridge path, see
+`QUICKSTART.md`, `FIRST-TIME-INSTALL.md`, and the legacy documentation
+preserved under `docs/`.
 
 ## Activation
 
@@ -89,7 +92,7 @@ The v2 repo activation path is documented in `docs/activation.md`.
 Run the current repo validation entrypoint with:
 
 ```bash
-scripts/run-uhome-server-checks.sh
+bash scripts/run-uhome-server-checks.sh
 ```
 
 Shared sync-record contract tooling is also available through:
