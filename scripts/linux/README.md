@@ -12,6 +12,6 @@ Examples of acceptable ownership:
 Examples of transitional or external ownership:
 
 - generic deployment planners and flashing flows belong to
-  `uDOS-sonic-screwdriver`
+  `sonic-screwdriver`
 - generated apply scripts should remain build artifacts, not hand-maintained
   canonical sources

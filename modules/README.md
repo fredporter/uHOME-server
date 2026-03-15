@@ -12,4 +12,5 @@ Current module families:
 - `dvr/`
 - `home-ops/`
 - `steam-surface/`
-- `home-assistant-bridge/`
+- `home-assistant-bridge/` as transitional local runtime support aligned to
+  `uHOME-matter`

@@ -19,6 +19,8 @@ Repo anchors:
 - `services/bridge/`
 - `services/scheduling/`
 - `src/uhome_server/routes/home_assistant.py`
+- sibling repo: `../../uHOME-matter/src/matter-bridge-contract.json`
+- sibling repo: `../../uHOME-matter/src/matter-clone-catalog.json`
 
 First project:
 
@@ -26,5 +28,7 @@ First project:
 
 Boundary note:
 
-- Home Assistant, Matter, and local device automation stay in `uHOME-server`
+- `uHOME-server` owns local execution, scheduling, and host runtime support
+- `uHOME-matter` owns Home Assistant, Matter, and local device automation
+  contracts or clone definitions
 - custom online APIs and webhook jobs belong in `uHOME-empire`

@@ -13,6 +13,7 @@ bringing forward the old repo ownership model unchanged.
 
 - local-network access surfaces
 - living-room or tablet-safe portal entry points
+- Thin GUI and kiosk-safe presentation shells
 - Vault Reader presentation on nearby devices
 - curated offline-content surfaces presented behind Beacon Activate
 
@@ -22,6 +23,7 @@ bringing forward the old repo ownership model unchanged.
 - online provider bridges
 - wider control-plane transport rules
 - the Beacon Activate Wi-Fi offer and local access handoff
+- browser workflow and operator control surfaces
 
 ## Core Rule
 

@@ -10,4 +10,4 @@ Current service lanes:
 - `scheduling/`
 - `launcher/`
 - `lan-discovery/`
-- `bridge/`
+- `bridge/` as transitional runtime support for `uHOME-matter` extensions

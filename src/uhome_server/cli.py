@@ -9,7 +9,13 @@ from pathlib import Path
 from typing import Any
 
 from uhome_server.backup import create_backup, list_backups, restore_backup
-from uhome_server.config import get_repo_root
+from uhome_server.config import (
+    get_repo_root,
+    get_sync_record_contract_path,
+    get_sync_record_schema_path,
+    load_sync_record_contract,
+    load_sync_record_schema,
+)
 from uhome_server.installer.bundle import read_bundle_manifest, verify_bundle
 from uhome_server.installer.executor import execute_staged_install
 from uhome_server.installer.health import run_promoted_health_checks
@@ -25,6 +31,11 @@ from uhome_server.installer.staging import stage_install_artifacts
 from uhome_server.services.uhome_presentation_service import (
     get_uhome_presentation_service,
 )
+from uhome_server.sync_records import (
+    load_sync_record_envelope,
+    validation_error_payload,
+)
+from pydantic import ValidationError
 
 
 def _read_json(path: str) -> dict[str, Any]:
@@ -335,12 +346,62 @@ def backup_main(argv: list[str] | None = None) -> int:
     return 2
 
 
+def contracts_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="uhome-contracts", description="Inspect shared contract assets.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    sync_parser = subparsers.add_parser("sync-record", help="Show the shared sync-record contract metadata.")
+    sync_parser.add_argument("--output", help="Optional path to write JSON result.")
+    validate_parser = subparsers.add_parser("validate-sync-record", help="Validate a sync-record envelope JSON file.")
+    validate_parser.add_argument("--input", required=True, help="Path to the sync-record envelope JSON file.")
+    validate_parser.add_argument("--output", help="Optional path to write JSON result.")
+
+    args = parser.parse_args(argv)
+
+    if args.command == "sync-record":
+        contract = load_sync_record_contract()
+        schema = load_sync_record_schema()
+        payload = {
+            "contract_path": str(get_sync_record_contract_path()),
+            "schema_path": str(get_sync_record_schema_path()),
+            "version": contract.get("version"),
+            "owner": contract.get("owner"),
+            "schema_title": schema.get("title"),
+            "record_types": [record["key"] for record in contract.get("record_types", [])],
+        }
+        _write_output(payload, args.output)
+        return 0
+
+    if args.command == "validate-sync-record":
+        try:
+            envelope = load_sync_record_envelope(args.input)
+        except ValidationError as exc:
+            _write_output(validation_error_payload(exc), args.output)
+            return 1
+        payload = {
+            "ok": True,
+            "contract_version": envelope.contract_version,
+            "counts": {
+                "contacts": len(envelope.contacts),
+                "activities": len(envelope.activities),
+                "binders": len(envelope.binders),
+                "sync_metadata": len(envelope.sync_metadata),
+            },
+        }
+        _write_output(payload, args.output)
+        return 0
+
+    parser.error(f"Unsupported contracts command: {args.command}")
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="uhome", description="uHOME operator CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("launcher", help="Manage local launcher state.")
     subparsers.add_parser("installer", help="Manage install plans and preflight.")
     subparsers.add_parser("backup", help="Backup and restore server state.")
+    subparsers.add_parser("contracts", help="Inspect shared contract assets.")
     args, remaining = parser.parse_known_args(argv)
     if args.command == "launcher":
         return launcher_main(remaining)
@@ -348,6 +409,8 @@ def main(argv: list[str] | None = None) -> int:
         return installer_main(remaining)
     if args.command == "backup":
         return backup_main(remaining)
+    if args.command == "contracts":
+        return contracts_main(remaining)
     parser.error(f"Unsupported command: {args.command}")
     return 2
 

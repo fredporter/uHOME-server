@@ -14,3 +14,5 @@ Planned use of this root:
 - checked-in schemas and examples
 - role and host-profile templates
 - pathway-readable configuration docs that are not mixed into runtime state
+- base runtime profile examples that stay separate from Matter extension
+  definitions

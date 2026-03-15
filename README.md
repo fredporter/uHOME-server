@@ -10,9 +10,11 @@ surfaces.
 
 - local-network services
 - persistent scheduling
+- automation fulfillment
 - service modules
 - home and server infrastructure surfaces
 - Linux-side Steam server host runtime
+- Thin GUI and kiosk-style local presentation shells
 - local Vault Reader and Beacon Activate offline-library surfaces
 
 ## Non-Goals
@@ -40,14 +42,28 @@ Build service modules as explicit, testable units and keep managed state outside
 ## Family Relation
 
 `uHOME-server` provides the always-on local runtime. It complements
-`uDOS-core`, pairs with `uDOS-wizard` for local networking contracts, and
-leaves Google or HubSpot sync workflows to `uHOME-empire`.
+`uDOS-core`, pairs with `uDOS-wizard` for workflow handoff and local execution,
+and leaves Google or HubSpot sync workflows to `uHOME-empire`.
+
+The v2 split is explicit:
+
+- `uHOME-server` owns the base runtime, scheduling, household services, and
+  persistent local execution
+- `uHOME-server` owns Thin GUI and kiosk-style local presentation contracts
+- `uDOS-wizard` owns workflow authority, online assist, and the browser
+  operator GUI
+- `uHOME-matter` owns Matter, Home Assistant, and local automation extension
+  contracts
+- `uHOME-client` and app repos consume runtime contracts without taking over
+  server ownership
 
 ## Transitional Runtime Note
 
 The existing standalone runtime and installer flow remain in `src/uhome_server/` and related legacy-support roots such as `apps/`, `courses/`, `defaults/`, `examples/`, `library/`, `memory/`, and `vault/`.
 
 This preserves the pre-existing remote history while the repo converges on the v2 scaffold and boundary model.
+
+For the base/runtime boundary itself, see `docs/base-runtime-boundary.md`.
 
 ## Quick Start
 
@@ -74,4 +90,19 @@ Run the current repo validation entrypoint with:
 
 ```bash
 scripts/run-uhome-server-checks.sh
+```
+
+Shared sync-record contract tooling is also available through:
+
+```bash
+uhome contracts sync-record
+uhome contracts validate-sync-record --input path/to/envelope.json
+```
+
+Runtime ingest and retrieval surfaces are available at:
+
+```bash
+POST /api/runtime/sync-records/ingest
+GET /api/runtime/sync-records/latest
+GET /api/runtime/sync-records
 ```

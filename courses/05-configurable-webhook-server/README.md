@@ -24,7 +24,8 @@ Repo anchors:
 
 Boundary note:
 
-- `uHOME-server` owns Home Assistant, Matter, and local automation pathways
+- `uHOME-server` owns the base runtime and local execution surfaces
+- `uHOME-matter` owns local automation and bridge contracts
 - `uHOME-empire` owns custom online APIs, webhooks, and always-on sync jobs
 
 First project:

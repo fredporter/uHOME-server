@@ -16,4 +16,4 @@ Notes:
 
 - this is the server-side operations lane, not the deployment lane
 - deployment and bootstrap remain the responsibility of
-  `uDOS-sonic-screwdriver`
+  `sonic-screwdriver`

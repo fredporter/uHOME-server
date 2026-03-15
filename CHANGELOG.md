@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Health and readiness endpoints (`/api/health`, `/api/ready`, `/api/debug/registries`)
 - Backup and restore CLI commands (`uhome backup create`, `uhome backup restore`, `uhome backup list`)
+- Shared sync-record contract inspection and envelope validation commands (`uhome contracts ...`)
+- Runtime sync-record ingest and retrieval endpoints backed by file-based envelope storage
+- Sync-envelope ingest is now reachable from exported `uHOME-empire` sync packages
 - Comprehensive operational runbooks (6 guides covering storage, nodes, registries, degradation)
 - Deployment Guide for Ubuntu 20.04+ LTS systems
 - Post-install validation script for automated deployment verification

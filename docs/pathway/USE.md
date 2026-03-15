@@ -6,7 +6,7 @@ repository as it exists today.
 ## What You Get
 
 - the standalone Linux server runtime
-- Home Assistant bridge routes
+- base runtime support for local automation bridges
 - presentation start, stop, and status control
 - runtime, dashboard, network, library, and container APIs
 - installer bundle verification, staging, promotion, and health checks
@@ -41,4 +41,8 @@ python3 -m venv .venv
 
 This repo owns the home-infrastructure runtime. It does not own generic
 deployment bootstrap as a product category. When install logic becomes generic
-or hardware-first, it should move toward `uDOS-sonic-screwdriver`.
+or hardware-first, it should move toward `sonic-screwdriver`.
+
+Matter, Home Assistant, and local automation contracts should move through
+`uHOME-matter`. Remote webhook-style and container-style job workflows should
+move through `uHOME-empire`.

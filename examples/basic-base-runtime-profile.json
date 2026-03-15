@@ -1,0 +1,9 @@
+{
+  "profile": "uhome-base-runtime",
+  "runtime_owner": "uHOME-server",
+  "mode": "standalone-uhome",
+  "services": [
+    "lan-discovery",
+    "launcher"
+  ]
+}

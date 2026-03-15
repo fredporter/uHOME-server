@@ -44,7 +44,23 @@ Owns:
 - household vault examples and learning path
 - `uHOME`-specific bundle and host-role contracts
 
-### `uDOS-sonic-screwdriver`
+### `uHOME-matter`
+
+Owns:
+
+- Matter and Home Assistant extension contracts
+- local automation clone catalogs and target maps
+- bridge-facing adapter definitions consumed by the server runtime
+
+### `uHOME-empire`
+
+Owns:
+
+- remote sync and webhook workflows
+- queueable automation or container-style job definitions
+- online provider action templates and CRM-style console workflows
+
+### `sonic-screwdriver`
 
 Owns:
 
@@ -63,10 +79,12 @@ Own:
 
 - `uHOME-server` is not a second core runtime beside `uDOS-core`
 - `uHOME-server` should not absorb generic deployment ownership that belongs in
-  `uDOS-sonic-screwdriver`
-- `uDOS-sonic-screwdriver` should not redefine `uHOME` runtime architecture
+  `sonic-screwdriver`
+- `sonic-screwdriver` should not redefine `uHOME` runtime architecture
 - client implementations should consume stable server contracts rather than
   being embedded in this repo
+- local automation contract ownership belongs in `uHOME-matter`, even when
+  runtime support still exists in `uHOME-server`
 
 ## Integration Contract
 
@@ -76,4 +94,4 @@ through:
 - shared contracts and schemas
 - workspace defaults and compatibility surfaces
 - pathway documentation that uses the same architecture language
-- install examples that remain compatible with `uDOS-sonic-screwdriver`
+- install examples that remain compatible with `sonic-screwdriver`

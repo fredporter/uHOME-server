@@ -4,23 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from uhome_server.config import JSONConfigStore
-
-_BRIDGE_VERSION = "0.1.0"
-
-_COMMAND_ALLOWLIST: set[str] = {
-    "uhome.tuner.discover",
-    "uhome.tuner.status",
-    "uhome.dvr.list_rules",
-    "uhome.dvr.schedule",
-    "uhome.dvr.cancel",
-    "uhome.ad_processing.get_mode",
-    "uhome.ad_processing.set_mode",
-    "uhome.playback.handoff",
-    "uhome.playback.status",
-    "system.info",
-    "system.capabilities",
-}
+from uhome_server.config import JSONConfigStore, load_home_assistant_bridge_definition
 
 
 class HomeAssistantService:
@@ -28,6 +12,21 @@ class HomeAssistantService:
 
     def __init__(self, config: JSONConfigStore | None = None):
         self.config = config or JSONConfigStore()
+        self.definition = load_home_assistant_bridge_definition()
+
+    def _bridge_name(self) -> str:
+        return str(self.definition.get("bridge", "uhome-ha"))
+
+    def _bridge_version(self) -> str:
+        return str(self.definition.get("version", "0.1.0"))
+
+    def _command_allowlist(self) -> set[str]:
+        allowlist = self.definition.get("command_allowlist", [])
+        return {item for item in allowlist if isinstance(item, str)}
+
+    def _entities(self) -> list[dict[str, Any]]:
+        entities = self.definition.get("entities", [])
+        return [item for item in entities if isinstance(item, dict)]
 
     def is_enabled(self) -> bool:
         return bool(self.config.get("ha_bridge_enabled", False))
@@ -35,61 +34,31 @@ class HomeAssistantService:
     def status(self) -> dict[str, Any]:
         enabled = self.is_enabled()
         return {
-            "bridge": "uhome-ha",
-            "version": _BRIDGE_VERSION,
+            "bridge": self._bridge_name(),
+            "version": self._bridge_version(),
             "status": "ok" if enabled else "disabled",
             "enabled": enabled,
-            "command_allowlist_size": len(_COMMAND_ALLOWLIST),
+            "command_allowlist_size": len(self._command_allowlist()),
         }
 
     def discover(self) -> dict[str, Any]:
-        entities = [
-            {
-                "id": "uhome.system",
-                "type": "service",
-                "name": "uHOME System",
-                "capabilities": ["info", "capabilities"],
-            },
-            {
-                "id": "uhome.tuner",
-                "type": "media_source",
-                "name": "uHOME Broadcast Tuner",
-                "capabilities": ["discover", "status"],
-            },
-            {
-                "id": "uhome.dvr",
-                "type": "recorder",
-                "name": "uHOME DVR",
-                "capabilities": ["list_rules", "schedule", "cancel"],
-            },
-            {
-                "id": "uhome.ad_processing",
-                "type": "processor",
-                "name": "uHOME Ad Processing",
-                "capabilities": ["get_mode", "set_mode"],
-            },
-            {
-                "id": "uhome.playback",
-                "type": "media_player",
-                "name": "uHOME Playback",
-                "capabilities": ["status", "handoff"],
-            },
-        ]
+        entities = self._entities()
         return {
-            "bridge": "uhome-ha",
-            "version": _BRIDGE_VERSION,
+            "bridge": self._bridge_name(),
+            "version": self._bridge_version(),
             "entity_count": len(entities),
             "entities": entities,
         }
 
     def execute_command(self, command: str, params: dict[str, Any]) -> dict[str, Any]:
-        if command not in _COMMAND_ALLOWLIST:
+        command_allowlist = self._command_allowlist()
+        if command not in command_allowlist:
             raise ValueError(f"Command not in allowlist: {command!r}")
 
         if command == "system.info":
-            return {"command": "system.info", "result": {"bridge_version": _BRIDGE_VERSION}}
+            return {"command": "system.info", "result": {"bridge_version": self._bridge_version()}}
         if command == "system.capabilities":
-            return {"command": "system.capabilities", "result": {"allowlist": sorted(_COMMAND_ALLOWLIST)}}
+            return {"command": "system.capabilities", "result": {"allowlist": sorted(command_allowlist)}}
         if command.startswith("uhome."):
             from uhome_server.services.uhome_command_handlers import dispatch
 

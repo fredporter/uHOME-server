@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-from uhome_server.cli import installer_main, launcher_main
+from uhome_server.cli import contracts_main, installer_main, launcher_main, main
 from uhome_server.installer.bundle import (
     BUNDLE_SCHEMA_VERSION,
     UHOMEBundleComponent,
@@ -133,6 +133,52 @@ def test_installer_verify_bundle_cli_missing_manifest(tmp_path):
     assert code == 1
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["valid"] is False
+
+
+def test_contracts_sync_record_cli(tmp_path):
+    output_path = tmp_path / "sync-record-contract.json"
+    code = contracts_main(["sync-record", "--output", str(output_path)])
+    assert code == 0
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["version"] == "v2.0.4"
+    assert payload["owner"] == "uDOS-core"
+    assert "canonical_contact" in payload["record_types"]
+
+
+def test_main_dispatches_contracts_command(tmp_path):
+    output_path = tmp_path / "sync-record-contract.json"
+    code = main(["contracts", "sync-record", "--output", str(output_path)])
+    assert code == 0
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["schema_title"] == "uDOS Sync Record Contract"
+
+
+def test_contracts_validate_sync_record_cli(tmp_path):
+    payload = {
+        "contract_version": "v2.0.4",
+        "contacts": [],
+        "activities": [],
+        "binders": [],
+        "sync_metadata": [],
+    }
+    input_path = tmp_path / "envelope.json"
+    input_path.write_text(json.dumps(payload), encoding="utf-8")
+    output_path = tmp_path / "validate.json"
+    code = contracts_main(["validate-sync-record", "--input", str(input_path), "--output", str(output_path)])
+    assert code == 0
+    result = json.loads(output_path.read_text(encoding="utf-8"))
+    assert result["ok"] is True
+    assert result["counts"]["contacts"] == 0
+
+
+def test_contracts_validate_sync_record_cli_rejects_invalid_payload(tmp_path):
+    input_path = tmp_path / "bad-envelope.json"
+    input_path.write_text(json.dumps({"contract_version": "bad"}), encoding="utf-8")
+    output_path = tmp_path / "validate.json"
+    code = contracts_main(["validate-sync-record", "--input", str(input_path), "--output", str(output_path)])
+    assert code == 1
+    result = json.loads(output_path.read_text(encoding="utf-8"))
+    assert result["ok"] is False
 
 
 def test_installer_stage_cli(tmp_path):

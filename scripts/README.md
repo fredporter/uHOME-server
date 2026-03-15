@@ -11,7 +11,7 @@ Current state:
 Boundary rule:
 
 - generic deployment bootstrap should converge toward
-  `uDOS-sonic-screwdriver`
+  `sonic-screwdriver`
 - `uHOME-server` should keep only server-owned scripts and host-role helpers
 
 Current validation entrypoint:

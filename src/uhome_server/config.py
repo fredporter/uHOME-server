@@ -19,6 +19,20 @@ def get_repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def get_workspace_root() -> Path:
+    return get_repo_root().parent
+
+
+def get_uhome_matter_root(workspace_root: Path | None = None) -> Path:
+    root = workspace_root or get_workspace_root()
+    return root / "uHOME-matter"
+
+
+def get_uhome_empire_root(workspace_root: Path | None = None) -> Path:
+    root = workspace_root or get_workspace_root()
+    return root / "uHOME-empire"
+
+
 def utc_now_iso_z() -> str:
     from datetime import datetime, timezone
 
@@ -155,3 +169,53 @@ def read_json_file(path: Path, default: dict[str, Any]) -> dict[str, Any]:
 def write_json_file(path: Path, payload: dict[str, Any], indent: int = 2) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=indent), encoding="utf-8")
+
+
+def get_sync_record_contract_path(workspace_root: Path | None = None) -> Path:
+    root = workspace_root or get_workspace_root()
+    return root / "uDOS-core" / "contracts" / "sync-record-contract.json"
+
+
+def get_sync_record_schema_path(workspace_root: Path | None = None) -> Path:
+    root = workspace_root or get_workspace_root()
+    return root / "uDOS-core" / "schemas" / "sync-record-contract.schema.json"
+
+
+def load_sync_record_contract(workspace_root: Path | None = None) -> dict[str, Any]:
+    path = get_sync_record_contract_path(workspace_root)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected JSON object in {path}")
+    return data
+
+
+def load_sync_record_schema(workspace_root: Path | None = None) -> dict[str, Any]:
+    path = get_sync_record_schema_path(workspace_root)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected JSON object in {path}")
+    return data
+
+
+def get_home_assistant_bridge_definition_path(workspace_root: Path | None = None) -> Path:
+    return get_uhome_matter_root(workspace_root) / "src" / "home-assistant-bridge-definition.json"
+
+
+def load_home_assistant_bridge_definition(workspace_root: Path | None = None) -> dict[str, Any]:
+    path = get_home_assistant_bridge_definition_path(workspace_root)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected JSON object in {path}")
+    return data
+
+
+def get_empire_container_job_catalog_path(workspace_root: Path | None = None) -> Path:
+    return get_uhome_empire_root(workspace_root) / "src" / "containers" / "container-job-catalog.json"
+
+
+def load_empire_container_job_catalog(workspace_root: Path | None = None) -> dict[str, Any]:
+    path = get_empire_container_job_catalog_path(workspace_root)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected JSON object in {path}")
+    return data
