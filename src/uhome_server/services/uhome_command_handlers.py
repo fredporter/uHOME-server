@@ -234,6 +234,53 @@ def playback_handoff(params: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _presentation_service():
+    from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
+
+    return get_uhome_presentation_service(repo_root=get_repo_root())
+
+
+def launcher_status(params: dict[str, Any]) -> dict[str, Any]:
+    del params
+    result = _presentation_service().get_status()
+    result["command"] = "uhome.launcher.status"
+    return result
+
+
+def launcher_start(params: dict[str, Any]) -> dict[str, Any]:
+    presentation = str(params.get("presentation") or "").strip()
+    try:
+        state = _presentation_service().start(presentation)
+        return {
+            "command": "uhome.launcher.start",
+            "success": True,
+            "active_presentation": state.get("active_presentation"),
+            "node_role": state.get("node_role"),
+            "updated_at": state.get("updated_at"),
+        }
+    except ValueError as exc:
+        return {"command": "uhome.launcher.start", "success": False, "error": str(exc)}
+
+
+def launcher_stop(params: dict[str, Any]) -> dict[str, Any]:
+    del params
+    state = _presentation_service().stop()
+    return {
+        "command": "uhome.launcher.stop",
+        "success": True,
+        "active_presentation": state.get("active_presentation"),
+        "node_role": state.get("node_role"),
+        "updated_at": state.get("updated_at"),
+    }
+
+
+def launcher_menu(params: dict[str, Any]) -> dict[str, Any]:
+    del params
+    result = _presentation_service().get_console_menu()
+    result["command"] = "uhome.launcher.menu"
+    return result
+
+
 _HANDLERS = {
     "uhome.tuner.discover": tuner_discover,
     "uhome.tuner.status": tuner_status,
@@ -244,6 +291,10 @@ _HANDLERS = {
     "uhome.ad_processing.set_mode": ad_set_mode,
     "uhome.playback.status": playback_status,
     "uhome.playback.handoff": playback_handoff,
+    "uhome.launcher.status": launcher_status,
+    "uhome.launcher.start": launcher_start,
+    "uhome.launcher.stop": launcher_stop,
+    "uhome.launcher.menu": launcher_menu,
 }
 
 

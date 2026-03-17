@@ -50,6 +50,19 @@ def test_launcher_status_initial_state(launcher_api_client):
     assert data["node_role"] in ("server", "tv-node")
 
 
+def test_launcher_menu_returns_actions(launcher_api_client):
+    """Test launcher menu endpoint returns console action items."""
+    response = launcher_api_client.get("/api/launcher/menu")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["menu_id"] == "uhome-console-main"
+    item_ids = {item["id"] for item in data["items"]}
+    assert "start-thin-gui" in item_ids
+    assert "start-steam-console" in item_ids
+    assert "open-network-capabilities" in item_ids
+
+
 def test_launcher_start_default_presentation(launcher_api_client):
     """Test starting launcher with default presentation."""
     response = launcher_api_client.post(

@@ -87,6 +87,8 @@ def _jellyfin_status() -> dict[str, Any]:
     status = playback_status({})
     return {
         "jellyfin_configured": status.get("jellyfin_configured", False),
+        "jellyfin_url_configured": status.get("jellyfin_url_configured", False),
+        "jellyfin_api_key_configured": status.get("jellyfin_api_key_configured", False),
         "jellyfin_reachable": status.get("jellyfin_reachable", False),
         "presentation_mode": status.get("presentation_mode"),
         "preferred_target_client": status.get("preferred_target_client"),

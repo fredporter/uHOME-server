@@ -65,6 +65,7 @@ def launcher_main(argv: list[str] | None = None) -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("status", help="Show current launcher status.")
+    subparsers.add_parser("menu", help="Show console action menu for launcher and stream controls.")
 
     start_parser = subparsers.add_parser("start", help="Start a launcher presentation.")
     start_parser.add_argument("--presentation", default="", help="Presentation to start: thin-gui or steam-console.")
@@ -76,6 +77,9 @@ def launcher_main(argv: list[str] | None = None) -> int:
 
     if args.command == "status":
         _write_output(service.get_status())
+        return 0
+    if args.command == "menu":
+        _write_output(service.get_console_menu())
         return 0
     if args.command == "start":
         try:

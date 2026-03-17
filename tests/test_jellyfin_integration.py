@@ -89,6 +89,8 @@ def test_jellyfin_status_configured_and_reachable(tmp_path, monkeypatch, mock_co
 
     assert result["command"] == "uhome.playback.status"
     assert result["jellyfin_configured"] is True
+    assert result["jellyfin_url_configured"] is True
+    assert result["jellyfin_api_key_configured"] is True
     assert result["jellyfin_reachable"] is True
     assert len(result["active_sessions"]) == 2
     assert result["active_sessions"][0]["user"] == "alice"
@@ -111,8 +113,34 @@ def test_jellyfin_status_not_configured(tmp_path, monkeypatch):
 
     assert result["command"] == "uhome.playback.status"
     assert result["jellyfin_configured"] is False
+    assert result["jellyfin_url_configured"] is False
+    assert result["jellyfin_api_key_configured"] is False
     assert "note" in result
     assert "JELLYFIN_URL" in result["note"]
+
+
+def test_jellyfin_status_url_without_api_key(tmp_path, monkeypatch):
+    """Test Jellyfin status when URL is configured but API key is missing."""
+    from uhome_server.services import playback_service, uhome_command_handlers
+
+    class URLOnlyConfig:
+        def get(self, key, default=None):
+            if key == "JELLYFIN_URL":
+                return "http://localhost:8096"
+            if key == "JELLYFIN_API_KEY":
+                return ""
+            return default or ""
+
+    monkeypatch.setattr(uhome_command_handlers, "_config", URLOnlyConfig())
+    monkeypatch.setattr(playback_service, "_config", URLOnlyConfig())
+
+    result = uhome_command_handlers.playback_status({})
+
+    assert result["command"] == "uhome.playback.status"
+    assert result["jellyfin_configured"] is False
+    assert result["jellyfin_url_configured"] is True
+    assert result["jellyfin_api_key_configured"] is False
+    assert "JELLYFIN_API_KEY" in result["note"]
 
 
 def test_jellyfin_status_unreachable(tmp_path, monkeypatch, mock_config_store):

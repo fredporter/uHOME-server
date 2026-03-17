@@ -93,6 +93,8 @@ def test_playback_status_route(app_client, monkeypatch, mock_config_store, mock_
     assert response.status_code == 200
     data = response.json()
     assert data["jellyfin_configured"] is True
+    assert data["jellyfin_url_configured"] is True
+    assert data["jellyfin_api_key_configured"] is True
     assert data["jellyfin_reachable"] is True
     assert len(data["active_sessions"]) == 1
     assert data["active_sessions"][0]["title"] == "Test Movie"
@@ -116,7 +118,33 @@ def test_playback_status_not_configured(app_client, monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert data["jellyfin_configured"] is False
+    assert data["jellyfin_url_configured"] is False
+    assert data["jellyfin_api_key_configured"] is False
     assert "note" in data
+
+
+def test_playback_status_url_without_api_key_is_not_configured(app_client, monkeypatch):
+    """Test playback status reports missing API key when only URL is set."""
+    from uhome_server.services import playback_service
+
+    class URLOnlyConfig:
+        def get(self, key, default=None):
+            if key == "JELLYFIN_URL":
+                return "http://localhost:8096"
+            if key == "JELLYFIN_API_KEY":
+                return ""
+            return default
+
+    monkeypatch.setattr(playback_service, "_config", URLOnlyConfig())
+
+    response = app_client.get("/api/playback/status")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["jellyfin_configured"] is False
+    assert data["jellyfin_url_configured"] is True
+    assert data["jellyfin_api_key_configured"] is False
+    assert "JELLYFIN_API_KEY" in data["note"]
 
 
 def test_playback_handoff_route(app_client, tmp_path, monkeypatch, mock_workspace):

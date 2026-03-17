@@ -51,6 +51,11 @@ def create_launcher_routes(auth_guard=None) -> APIRouter:
         """
         return presentation_svc.get_status()
 
+    @router.get("/menu")
+    async def get_launcher_menu():
+        """Get a console-friendly action menu for launcher and stream controls."""
+        return presentation_svc.get_console_menu()
+
     @router.post("/start")
     async def start_launcher_session(payload: LauncherStartRequest):
         """

@@ -15,6 +15,11 @@ from uhome_server.cluster.registry import (
     get_storage_registry,
     summarize_topology,
 )
+from uhome_server.config import get_repo_root, utc_now_iso_z
+from uhome_server.services.channel_service import get_channel_service
+from uhome_server.services.client_capability_service import get_client_capability_service
+from uhome_server.services.uhome_command_handlers import playback_status
+from uhome_server.services.uhome_presentation_service import get_uhome_presentation_service
 
 router = APIRouter(prefix="/api/network", tags=["network"])
 
@@ -105,6 +110,52 @@ async def library_index():
     nodes = get_node_registry().list_nodes()
     volumes = get_storage_registry().list_volumes()
     return build_library_index(nodes, volumes)
+
+
+@router.get("/capabilities")
+async def network_capabilities():
+    nodes = get_node_registry().list_nodes()
+    volumes = get_storage_registry().list_volumes()
+    topology = summarize_topology(nodes, volumes)
+    libraries = build_library_index(nodes, volumes)
+    channels = get_channel_service().list_channels()
+    playback = playback_status({})
+    launcher = get_uhome_presentation_service(repo_root=get_repo_root()).get_status()
+    clients = get_client_capability_service(get_repo_root()).profile_summary()
+
+    return {
+        "status": topology.get("status", "degraded"),
+        "timestamp": utc_now_iso_z(),
+        "topology": {
+            "status": topology.get("status"),
+            "issues": topology.get("issues", []),
+            "summary": topology.get("summary", {}),
+        },
+        "libraries": {
+            "count": libraries.get("count", 0),
+            "summary": libraries.get("summary", {}),
+        },
+        "streaming": {
+            "channel_count": len(channels),
+            "channels": [
+                {
+                    "channel_id": item.get("channel_id"),
+                    "display_name": item.get("display_name"),
+                    "media_mode": item.get("media_mode"),
+                }
+                for item in channels
+            ],
+            "jellyfin_configured": bool(playback.get("jellyfin_configured", False)),
+            "jellyfin_reachable": bool(playback.get("jellyfin_reachable", False)),
+            "active_playback_sessions": len(playback.get("active_sessions", [])),
+        },
+        "launcher": {
+            "running": bool(launcher.get("running", False)),
+            "active_presentation": launcher.get("active_presentation"),
+            "preferred_presentation": launcher.get("preferred_presentation"),
+        },
+        "clients": clients,
+    }
 
 
 @router.post("/volumes")

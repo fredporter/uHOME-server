@@ -3,14 +3,14 @@
 **Status:** Stable (Phase 5)  
 **Base Path:** `/api/launcher`  
 **Version:** 1.0  
-**Last Updated:** 2026-03-10
+**Last Updated:** 2026-03-17
 
 ## Overview
 
 The Launcher API provides stable REST endpoints for managing uHOME presentation
 sessions on TV nodes and console devices. It supports starting, stopping, and
 querying launcher sessions for different presentation modes (thin-gui,
-steam-console).
+steam-console), along with a console-friendly action menu.
 
 ## Authentication
 
@@ -62,6 +62,43 @@ Host: uhome-server.local:8090
 
 **Status Codes:**
 - `200 OK` - Status retrieved successfully
+
+### GET /api/launcher/menu
+
+Get a console-friendly menu that describes launcher and stream-control actions.
+
+**Request:**
+```http
+GET /api/launcher/menu HTTP/1.1
+Host: uhome-server.local:8090
+```
+
+**Response:**
+```json
+{
+  "menu_id": "uhome-console-main",
+  "title": "uHOME Console",
+  "running": true,
+  "active_presentation": "thin-gui",
+  "preferred_presentation": "thin-gui",
+  "node_role": "tv-node",
+  "items": [
+    {
+      "id": "start-steam-console",
+      "label": "Start Steam Console",
+      "enabled": true,
+      "action": {
+        "method": "POST",
+        "path": "/api/launcher/start",
+        "body": {"presentation": "steam-console"}
+      }
+    }
+  ]
+}
+```
+
+**Status Codes:**
+- `200 OK` - Menu payload retrieved successfully
 
 ### POST /api/launcher/start
 

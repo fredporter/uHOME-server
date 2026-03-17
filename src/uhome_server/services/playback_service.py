@@ -45,6 +45,10 @@ def _jellyfin_base_url() -> str:
     return str(_config.get("JELLYFIN_URL", "") or "").strip()
 
 
+def _jellyfin_api_key() -> str:
+    return str(_config.get("JELLYFIN_API_KEY", "") or "").strip()
+
+
 def _uhome_workspace_fields() -> dict[str, str]:
     workspace = get_template_workspace_service()
     return workspace.read_fields("settings", "uhome")
@@ -81,20 +85,30 @@ class PlaybackService:
             workspace_fields, "preferred_target_client", _DEFAULT_TARGET_CLIENT
         )
         base_url = _jellyfin_base_url()
+        api_key = _jellyfin_api_key()
+        jellyfin_url_configured = bool(base_url)
+        jellyfin_api_key_configured = bool(api_key)
+        jellyfin_configured = jellyfin_url_configured and jellyfin_api_key_configured
         result: dict[str, Any] = {
-            "jellyfin_configured": bool(base_url),
+            "jellyfin_configured": jellyfin_configured,
+            "jellyfin_url_configured": jellyfin_url_configured,
+            "jellyfin_api_key_configured": jellyfin_api_key_configured,
             "active_sessions": [],
             "presentation_mode": presentation_mode,
             "presentation_mode_source": presentation_mode_source,
             "preferred_target_client": preferred_target_client,
             "preferred_target_client_source": preferred_target_client_source,
         }
-        if not base_url:
-            result["note"] = "Set JELLYFIN_URL to enable live playback status."
+        if not jellyfin_configured:
+            if not jellyfin_url_configured and not jellyfin_api_key_configured:
+                result["note"] = "Set JELLYFIN_URL and JELLYFIN_API_KEY to enable live playback status."
+            elif not jellyfin_url_configured:
+                result["note"] = "Set JELLYFIN_URL to enable live playback status."
+            else:
+                result["note"] = "Set JELLYFIN_API_KEY to enable live playback status."
             return result
 
         try:
-            api_key = str(_config.get("JELLYFIN_API_KEY", "") or "")
             url = f"{base_url.rstrip('/')}/Sessions?api_key={api_key}"
             with urllib.request.urlopen(url, timeout=3) as resp:
                 sessions = json.loads(resp.read())

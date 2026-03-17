@@ -9,6 +9,7 @@ def test_bridge_definition_is_loaded_from_uhome_matter():
     assert definition["extension"] == "uHOME-matter"
     assert definition["runtime_owner"] == "uHOME-server"
     assert "uhome.playback.status" in definition["command_allowlist"]
+    assert "uhome.launcher.menu" in definition["command_allowlist"]
 
 
 def test_home_assistant_service_uses_shared_bridge_definition():
@@ -21,3 +22,4 @@ def test_home_assistant_service_uses_shared_bridge_definition():
     assert status["command_allowlist_size"] == len(capabilities["result"]["allowlist"])
     assert discover["entity_count"] == len(discover["entities"])
     assert any(entity["id"] == "uhome.playback" for entity in discover["entities"])
+    assert any(entity["id"] == "uhome.launcher" for entity in discover["entities"])

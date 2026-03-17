@@ -109,6 +109,79 @@ class UHomePresentationService:
         self._write_state(payload)
         return payload
 
+    def get_console_menu(self) -> dict[str, Any]:
+        """Return an action-oriented launcher menu for console clients."""
+        status = self.get_status()
+        active = status.get("active_presentation")
+        running = bool(status.get("running"))
+        return {
+            "menu_id": "uhome-console-main",
+            "title": "uHOME Console",
+            "running": running,
+            "active_presentation": active,
+            "preferred_presentation": status.get("preferred_presentation"),
+            "node_role": status.get("node_role"),
+            "items": [
+                {
+                    "id": "start-thin-gui",
+                    "label": "Start Thin GUI",
+                    "description": "Launch the thin GUI presentation lane.",
+                    "enabled": active != "thin-gui",
+                    "action": {
+                        "method": "POST",
+                        "path": "/api/launcher/start",
+                        "body": {"presentation": "thin-gui"},
+                    },
+                },
+                {
+                    "id": "start-steam-console",
+                    "label": "Start Steam Console",
+                    "description": "Launch the Steam console presentation lane.",
+                    "enabled": active != "steam-console",
+                    "action": {
+                        "method": "POST",
+                        "path": "/api/launcher/start",
+                        "body": {"presentation": "steam-console"},
+                    },
+                },
+                {
+                    "id": "stop-presentation",
+                    "label": "Stop Active Presentation",
+                    "description": "Stop any active launcher presentation session.",
+                    "enabled": running,
+                    "action": {
+                        "method": "POST",
+                        "path": "/api/launcher/stop",
+                        "body": {},
+                    },
+                },
+                {
+                    "id": "open-playback-status",
+                    "label": "Playback Status",
+                    "description": "Inspect Jellyfin and active session state.",
+                    "enabled": True,
+                    "action": {
+                        "method": "GET",
+                        "path": "/api/playback/status",
+                    },
+                },
+                {
+                    "id": "open-network-capabilities",
+                    "label": "Network Capabilities",
+                    "description": "Inspect topology and registered client capability profiles.",
+                    "enabled": True,
+                    "action": {
+                        "method": "GET",
+                        "path": "/api/network/capabilities",
+                    },
+                },
+            ],
+            "metadata": {
+                "state_path": status.get("state_path"),
+                "updated_at": status.get("updated_at"),
+            },
+        }
+
 
 def get_uhome_presentation_service(repo_root: Path) -> UHomePresentationService:
     return UHomePresentationService(repo_root=repo_root)

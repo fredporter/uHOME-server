@@ -60,6 +60,7 @@ def test_discover_when_enabled_returns_entities(monkeypatch):
     assert "uhome.dvr" in ids
     assert "uhome.ad_processing" in ids
     assert "uhome.playback" in ids
+    assert "uhome.launcher" in ids
     assert "uhome.system" in ids
 
 
@@ -207,3 +208,52 @@ class TestUHomePlayback:
         assert result["success"] is True
         queue = json.loads(self._queue_file.read_text(encoding="utf-8"))
         assert queue[0]["target_client"] == "tv"
+
+
+class TestUHomeLauncher:
+    @pytest.fixture(autouse=True)
+    def _patch_launcher_repo(self, monkeypatch, tmp_path):
+        from uhome_server.config import bootstrap_runtime
+        import uhome_server.services.uhome_command_handlers as handlers
+        import uhome_server.services.uhome_presentation_service as presentation_svc
+
+        bootstrap_runtime(tmp_path)
+
+        class FakeWorkspaceService:
+            def read_fields(self, section, component_id):
+                return {"presentation_mode": "thin-gui", "node_role": "server"}
+
+        monkeypatch.setattr(handlers, "get_repo_root", lambda: tmp_path)
+        monkeypatch.setattr(
+            presentation_svc,
+            "get_template_workspace_service",
+            lambda repo_root=None: FakeWorkspaceService(),
+        )
+
+    def test_launcher_menu_command(self, monkeypatch):
+        _monkeypatch_enabled(monkeypatch, True)
+        client = _app()
+        result = client.post("/api/ha/command", json={"command": "uhome.launcher.menu"}).json()["result"]
+        assert result["command"] == "uhome.launcher.menu"
+        assert result["menu_id"] == "uhome-console-main"
+        item_ids = {item["id"] for item in result["items"]}
+        assert "start-thin-gui" in item_ids
+        assert "open-network-capabilities" in item_ids
+
+    def test_launcher_start_status_stop_commands(self, monkeypatch):
+        _monkeypatch_enabled(monkeypatch, True)
+        client = _app()
+
+        started = client.post(
+            "/api/ha/command",
+            json={"command": "uhome.launcher.start", "params": {"presentation": "steam-console"}},
+        ).json()["result"]
+        assert started["success"] is True
+        assert started["active_presentation"] == "steam-console"
+
+        status = client.post("/api/ha/command", json={"command": "uhome.launcher.status"}).json()["result"]
+        assert status["active_presentation"] == "steam-console"
+
+        stopped = client.post("/api/ha/command", json={"command": "uhome.launcher.stop"}).json()["result"]
+        assert stopped["success"] is True
+        assert stopped["active_presentation"] is None

@@ -162,17 +162,32 @@ Content-Type: application/json
 }
 ```
 
-**Note:** This endpoint is specified in the capability model but not yet
-implemented. For Phase 5, clients should track capabilities locally and adapt UI
-accordingly.
+**Example Response:**
+```json
+{
+    "client_id": "android-phone-abc123",
+    "registered_at": "2026-03-17T14:20:00Z",
+    "session_token": "session_abc123def456",
+    "server_recommendations": {
+        "ui_mode": "mobile",
+        "enable_gestures": true,
+        "enable_voice_search": true,
+        "recommended_handoff_target": "living-room-tv"
+    }
+}
+```
+
+Clients can be listed with `GET /api/client` and updated dynamically with
+`POST /api/client/{client_id}/capabilities`.
 
 ### 4. Integrate Core APIs
 
 Use the stable REST APIs:
 
 - **Playback API** - Media status and handoff ([PLAYBACK-API.md](PLAYBACK-API.md))
-- **Launcher API** - Session management ([LAUNCHER-API.md](LAUNCHER-API.md))
+- **Launcher API** - Session management and console menu ([LAUNCHER-API.md](LAUNCHER-API.md))
 - **Household API** - Living-room-safe status and browsing ([HOUSEHOLD-API.md](HOUSEHOLD-API.md))
+- **Network Capability Summary** - Topology + streaming + client profile summary (`GET /api/network/capabilities`)
 
 ## Core API Integration
 

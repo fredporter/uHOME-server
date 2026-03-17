@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -230,6 +232,67 @@ def test_library_index_reports_partial_availability(monkeypatch):
     assert body["libraries"][0]["status"] == "degraded"
     assert body["libraries"][0]["available_volume_count"] == 1
     assert body["libraries"][0]["offline_volume_count"] == 1
+
+
+def test_network_capabilities_combines_streaming_launcher_and_client_profiles(monkeypatch):
+    client = _client(monkeypatch)
+
+    class _Channels:
+        def list_channels(self):
+            return [
+                {
+                    "channel_id": "channel.rewind.mtv",
+                    "display_name": "Music TV Rewind",
+                    "media_mode": "audio-video",
+                }
+            ]
+
+    class _Clients:
+        def profile_summary(self):
+            return {
+                "count": 2,
+                "profiles": {"controller": 1, "remote": 1, "touch": 0},
+                "clients": [
+                    {
+                        "client_id": "living-room-tv",
+                        "device_name": "Living Room TV",
+                        "platform": "android-tv",
+                        "capability_profile": "remote",
+                        "last_seen": "2026-03-17T00:00:00Z",
+                    }
+                ],
+            }
+
+    class _Launcher:
+        def get_status(self):
+            return {
+                "running": True,
+                "active_presentation": "steam-console",
+                "preferred_presentation": "steam-console",
+            }
+
+    monkeypatch.setattr(network_routes, "get_repo_root", lambda: Path("/tmp/uhome-server"))
+    monkeypatch.setattr(network_routes, "get_channel_service", lambda: _Channels())
+    monkeypatch.setattr(network_routes, "get_client_capability_service", lambda repo_root=None: _Clients())
+    monkeypatch.setattr(network_routes, "get_uhome_presentation_service", lambda repo_root=None: _Launcher())
+    monkeypatch.setattr(
+        network_routes,
+        "playback_status",
+        lambda params: {
+            "jellyfin_configured": True,
+            "jellyfin_reachable": True,
+            "active_sessions": [{"title": "Example Movie"}],
+        },
+    )
+
+    response = client.get("/api/network/capabilities")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["streaming"]["channel_count"] == 1
+    assert body["streaming"]["jellyfin_reachable"] is True
+    assert body["streaming"]["active_playback_sessions"] == 1
+    assert body["launcher"]["active_presentation"] == "steam-console"
+    assert body["clients"]["profiles"]["remote"] == 1
 
 
 def test_registry_persists_and_summarizes_topology(tmp_path):

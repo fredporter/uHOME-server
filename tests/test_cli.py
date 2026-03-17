@@ -81,6 +81,17 @@ def test_launcher_cli_rejects_invalid_presentation(tmp_path):
     assert code == 2
 
 
+def test_launcher_cli_menu(tmp_path):
+    with patch("uhome_server.cli._write_output") as write_output:
+        code = launcher_main(["--repo-root", str(tmp_path), "menu"])
+
+    assert code == 0
+    payload = write_output.call_args[0][0]
+    assert payload["menu_id"] == "uhome-console-main"
+    item_ids = {item["id"] for item in payload["items"]}
+    assert "start-thin-gui" in item_ids
+
+
 def test_installer_preflight_cli(tmp_path):
     probe_path = tmp_path / "probe.json"
     _write_probe(probe_path)
