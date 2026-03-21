@@ -12,7 +12,7 @@ from uhome_server.routes import library as library_routes
 
 
 def test_container_catalog_discovers_home_assistant_library_entry():
-    service = ContainerCatalogService(Path("/Users/fredbook/Code/uHOME-server"))
+    service = ContainerCatalogService(Path(__file__).resolve().parents[1])
     entry = service.get_entry("home-assistant")
     assert entry is not None
     assert entry.kind == "library"
