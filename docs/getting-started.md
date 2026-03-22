@@ -9,6 +9,18 @@
 bash scripts/run-uhome-server-checks.sh
 ```
 
+5. For direct local use, launch the console/kiosk surface with:
+
+```bash
+bash scripts/first-run-launch.sh
+```
+
+6. For Ubuntu-class host readiness, run:
+
+```bash
+bash scripts/check-prereqs.sh --storage-path /media/library --workspace-path ~/.workspace
+```
+
 1. Use `uDOS-wizard/docs/first-launch-quickstart.md` when validating workflow handoff into a running `uHOME-server`.
 1. Use `uHOME-empire/docs/quickstart.md` when validating pack or sync handoff into the local runtime.
 1. Keep service code under `services/` and `modules/`.

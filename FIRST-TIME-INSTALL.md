@@ -52,6 +52,18 @@ source .venv/bin/activate
 python -m uvicorn uhome_server.app:app --host 0.0.0.0 --port 8000
 ```
 
+Or use the direct console/kiosk launcher:
+
+```bash
+bash scripts/first-run-launch.sh
+```
+
+macOS wrapper:
+
+```bash
+open ./scripts/first-run-launch.command
+```
+
 ## 6. Validate Endpoints
 
 In another terminal:

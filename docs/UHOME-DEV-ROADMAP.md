@@ -149,7 +149,7 @@ Exit criteria:
 
 ## Phase 6: Operational Maturity
 
-Status: ~95% complete (started 2026-03-10, Session 2 completed 2026-03-10)
+Status: core Phase 6 checklist complete (started 2026-03-10, Session 2 completed 2026-03-10, tranche follow-up 2026-03-22)
 
 Goal: make `uHOME Server` maintainable as its own public product.
 
@@ -159,18 +159,19 @@ Deliverables:
 - ✅ release process and versioning policy (RELEASE-POLICY.md + CHANGELOG.md)
 - ✅ backup/restore flow for config, registry, and library metadata (CLI + 13 tests)
 - ✅ observability for job queue, node health, and storage health (health endpoints + guide)
+- ✅ environment configuration guide and checked-in env example
+- ✅ prerequisite checker for kernel, systemd, workspace, and storage paths
 
 Exit criteria:
 - ✅ public releases are reproducible (tagging workflow documented)
 - ✅ operator recovery steps are documented (6 runbooks with scenarios)
 - ✅ server state can be backed up and restored cleanly (uhome backup CLI)
 - ✅ health endpoints available for monitoring (3 endpoints: health, ready, debug)
-- ✅ all tests passing (131 tests, zero regressions)
+- ✅ all tests passing (196 tests, zero regressions)
 
 Deferred to future:
 - PyPI/Docker Hub publishing automation (manual process documented)
 - Terraform cloud deployment templates (optional)
-- Automated runbook validation tests (manual validation sufficient)
 
 ## Cross-Cutting Priorities
 

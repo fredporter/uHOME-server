@@ -114,6 +114,41 @@ def test_installer_preflight_cli_with_host_profile(tmp_path):
     assert payload["profile_id"] == "standalone-linux"
 
 
+def test_installer_check_prereqs_cli(tmp_path):
+    workspace_path = tmp_path / "workspace"
+    storage_path = tmp_path / "media"
+    output_path = tmp_path / "prereqs.json"
+    workspace_path.mkdir()
+    storage_path.mkdir()
+
+    with patch("uhome_server.cli.collect_host_prerequisites") as collect_host_prerequisites:
+        collect_host_prerequisites.return_value.to_dict.return_value = {
+            "passed": True,
+            "checks": {"platform": {"ok": True}},
+            "warnings": [],
+        }
+        collect_host_prerequisites.return_value.passed = True
+        code = installer_main(
+            [
+                "check-prereqs",
+                "--storage-path",
+                str(storage_path),
+                "--workspace-path",
+                str(workspace_path),
+                "--output",
+                str(output_path),
+            ]
+        )
+
+    assert code == 0
+    collect_host_prerequisites.assert_called_once_with(
+        storage_paths=[str(storage_path)],
+        workspace_path=str(workspace_path),
+    )
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["passed"] is True
+
+
 def test_installer_plan_cli(tmp_path):
     probe_path = tmp_path / "probe.json"
     bundle_dir = tmp_path / "bundle"

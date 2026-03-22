@@ -16,6 +16,12 @@ bash scripts/run-uhome-server-checks.sh
 source .venv/bin/activate
 ```
 
+One-command local console launch:
+
+```bash
+bash scripts/first-run-launch.sh
+```
+
 ## 2. Start Runtime
 
 ```bash
@@ -34,6 +40,7 @@ curl http://127.0.0.1:8000/api/runtime/info
 
 ```bash
 curl http://127.0.0.1:8000/api/runtime/thin/automation
+curl http://127.0.0.1:8000/api/launcher/menu
 ```
 
 ## 5. Validate CLI Console Lane

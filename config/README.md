@@ -9,6 +9,15 @@ Current config surfaces still live elsewhere:
 - `memory/config/uhome.json` for runtime-local server config
 - environment variables for optional runtime overrides
 
+Checked-in operator examples:
+
+- `environment.example.env` for service environment variables
+- `base-runtime-profile.example.json` for runtime profile examples
+
+Operator guide:
+
+- `../docs/ENVIRONMENT-CONFIGURATION.md`
+
 Planned use of this root:
 
 - checked-in schemas and examples

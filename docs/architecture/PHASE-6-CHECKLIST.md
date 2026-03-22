@@ -25,9 +25,9 @@ recovery runbooks, and operator observability.
 - [x] Deployment guide for Ubuntu 20.04+ LTS
 - [x] Docker compose template for local development/testing
 - [ ] Terraform templates for cloud deployment (optional)
-- [ ] Environment configuration guide and examples
+- [x] Environment configuration guide and examples
 - [x] Post-install validation script
-- [ ] Prerequisite checker (kernel, systemd, storage paths)
+- [x] Prerequisite checker (kernel, systemd, storage paths)
 
 ### Release Engineering
 
@@ -67,10 +67,10 @@ recovery runbooks, and operator observability.
 
 ### Integration And Testing
 
-- [x] All Phase 5 tests continue passing (106 → 131 tests, all passing)
+- [x] All Phase 5 tests continue passing (full suite green)
 - [x] Backup/restore round-trip tests (13 tests)
 - [x] Health check validation tests (12 tests)
-- [ ] Runbook validation tests (simulate failure scenarios) - manual for now
+- [x] Runbook validation tests (simulate failure scenarios)
 - [x] Deployment script validation (post-install validation script created)
 
 ## Exit Criteria
@@ -81,7 +81,7 @@ recovery runbooks, and operator observability.
 - [x] releases are version-tagged and reproducible
 - [x] operator can observe job queue health and storage state
 - [x] server gracefully degrades when nodes or storage disappear (documented)
-- [x] full test suite remains green (131 tests passing, zero regressions)
+- [x] full test suite remains green (196 tests passing, zero regressions)
 
 ## Progress Summary
 
@@ -100,10 +100,12 @@ recovery runbooks, and operator observability.
   - Clean Shutdown: ~250 lines, graceful termination + state preservation
   - Graceful Degradation Patterns: ~400 lines, reference guide + decision tree
 
-✅ **Deployment Automation** (3 of 3 complete)
+✅ **Deployment Automation** (5 of 5 core items complete)
   - Docker compose template: Full production-ready template with comments
   - Ubuntu 20.04+ deployment guide: 11-phase step-by-step guide
   - Post-install validation: 9-phase automated validation script
+  - Environment configuration guide and checked-in example env file
+  - Host prerequisite checker for kernel, systemd, workspace, and storage paths
 
 ✅ **Backup and Restore** (9 of 9 complete)
   - Complete backup/restore module with CLI integration
@@ -130,16 +132,17 @@ recovery runbooks, and operator observability.
   - Quality gates and deprecation policy defined
   - PyPI/Docker publishing documented (automation deferred)
 
-✅ **Integration and Testing** (4 of 5 complete)
-  - 131 tests passing (106 Phase 5 + 25 new Phase 6)
+✅ **Integration and Testing** (5 of 5 complete)
+  - 196 tests passing across the full suite
   - Health endpoint tests (12 tests)
   - Backup/restore round-trip tests (13 tests)
   - Zero regressions maintained throughout Phase 6
+  - Automated runbook validation for storage recovery and primary failover paths
 
-**Phase 6 Status: ~95% Complete** ✅
+**Phase 6 Status: Core Checklist Complete** ✅
   - All core deliverables complete
   - Optional automation items deferred (PyPI, Docker Hub, Terraform)
-  - Runbook validation tests deferred (manual validation sufficient for now)
+  - Runbook validation tests automated for core storage and node recovery paths
 
 ## Deferred Beyond Phase 6
 

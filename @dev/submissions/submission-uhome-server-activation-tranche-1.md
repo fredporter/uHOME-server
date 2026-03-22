@@ -1,0 +1,24 @@
+# Submission: `#binder/uhome-server-activation` tranche 1
+
+- binder: `#binder/uhome-server-activation`
+- owning repo: `uHOME-server`
+- branch: `develop`
+- summary:
+  - added the first uHOME-server activation doc
+  - added a repo-level validation entrypoint for editable install bootstrap and test execution
+  - added a basic operator walkthrough and activated the repo entry surfaces
+- validation run:
+  - `uHOME-server/scripts/run-uhome-server-checks.sh`
+- policy checks:
+  - activation stays inside persistent local-service ownership
+  - activation does not claim shell UX ownership or provider bridge ownership
+- promotable outputs:
+  - `uHOME-server/docs/activation.md`
+  - `uHOME-server/scripts/run-uhome-server-checks.sh`
+  - `uHOME-server/examples/basic-uhome-server-session.md`
+  - `uHOME-server/README.md`
+- risks:
+  - the activation script bootstraps a local `.venv`, which remains transitional until a family-wide managed Python tooling lane replaces repo-local virtualenv setup
+- next promotion step:
+  - commit and push `uHOME-server` and `uDOS-dev`
+  - advance the roadmap ledger toward the next repo-activation target

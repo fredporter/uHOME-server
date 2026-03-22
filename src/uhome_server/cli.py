@@ -22,6 +22,7 @@ from uhome_server.installer.health import run_promoted_health_checks
 from uhome_server.installer.live_apply import run_ubuntu_apply_plan
 from uhome_server.installer.plan import UHOMEInstallOptions, build_uhome_install_plan
 from uhome_server.installer.preflight import get_host_profile, preflight_check
+from uhome_server.installer.prerequisites import collect_host_prerequisites
 from uhome_server.installer.promotion import (
     promote_target_root,
     rollback_promoted_target,
@@ -163,6 +164,20 @@ def installer_main(argv: list[str] | None = None) -> int:
     health_target_parser.add_argument("--host-root", required=True, help="Host-style root to health-check.")
     health_target_parser.add_argument("--output", help="Optional path to write the JSON result.")
 
+    prereq_parser = subparsers.add_parser("check-prereqs", help="Check Ubuntu-class host prerequisites for uHOME-server.")
+    prereq_parser.add_argument(
+        "--storage-path",
+        action="append",
+        dest="storage_paths",
+        help="Required storage path. Repeat the flag to check multiple paths.",
+    )
+    prereq_parser.add_argument(
+        "--workspace-path",
+        default="~/.workspace",
+        help="Required workspace directory (default: ~/.workspace).",
+    )
+    prereq_parser.add_argument("--output", help="Optional path to write the JSON result.")
+
     live_apply_parser = subparsers.add_parser("apply-live", help="Run the generated Ubuntu apply plan. Dry-run unless --execute is set.")
     live_apply_parser.add_argument("--host-root", required=True, help="Host-style root containing ubuntu-apply-plan.sh.")
     live_apply_parser.add_argument("--execute", action="store_true", help="Actually execute the plan commands instead of reporting them.")
@@ -273,6 +288,14 @@ def installer_main(argv: list[str] | None = None) -> int:
             return 1
         _write_output({"success": result.ok, "result": result.to_dict()}, args.output)
         return 0 if result.ok else 1
+
+    if args.command == "check-prereqs":
+        result = collect_host_prerequisites(
+            storage_paths=args.storage_paths,
+            workspace_path=args.workspace_path,
+        )
+        _write_output(result.to_dict(), args.output)
+        return 0 if result.passed else 1
 
     if args.command == "apply-live":
         try:

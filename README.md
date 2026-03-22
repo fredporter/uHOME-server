@@ -74,6 +74,22 @@ bash scripts/run-uhome-server-checks.sh
 .venv/bin/python -m uvicorn uhome_server.app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
+For the direct local console/kiosk launch path, use:
+
+```bash
+bash scripts/first-run-launch.sh
+```
+
+That bootstraps the repo, starts `uHOME-server`, activates the default local
+presentation lane, and opens the console surface at
+`http://127.0.0.1:8000/api/runtime/thin/automation`.
+
+On macOS, the Finder wrapper is:
+
+```bash
+open ./scripts/first-run-launch.command
+```
+
 In another terminal:
 
 ```bash
@@ -84,6 +100,9 @@ curl http://localhost:8000/api/runtime/ready
 For the full runtime, Wizard pairing, and Empire bridge path, see
 `QUICKSTART.md`, `FIRST-TIME-INSTALL.md`, and the legacy documentation
 preserved under `docs/`.
+
+For operator env vars and preflight host checks, use
+`docs/ENVIRONMENT-CONFIGURATION.md` and `bash scripts/check-prereqs.sh`.
 
 ## Activation
 

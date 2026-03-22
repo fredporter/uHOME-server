@@ -21,6 +21,14 @@ source .venv/bin/activate
 The check script creates `.venv` when needed, installs the editable dev
 dependencies, and runs the current `pytest` suite.
 
+Direct launch path:
+
+```bash
+bash scripts/first-run-launch.sh
+```
+
+That starts the server and opens the local console/kiosk GUI automatically.
+
 ## 2. Run The API
 
 ```bash

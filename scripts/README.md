@@ -18,3 +18,5 @@ Current validation entrypoint:
 
 - `run-uhome-server-checks.sh` for editable install bootstrap and repo test
   execution
+- `first-run-launch.sh` for direct local server plus console/kiosk launch
+- `first-run-launch.command` as the macOS wrapper for the launcher script

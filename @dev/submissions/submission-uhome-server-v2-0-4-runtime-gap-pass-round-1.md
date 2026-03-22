@@ -1,0 +1,27 @@
+# Submission: `#binder/uhome-server-v2-0-4-runtime-gap-pass` round 1
+
+- binder: `#binder/uhome-server-v2-0-4-runtime-gap-pass`
+- owning repo: `uHOME-server`
+- branch: `develop`
+- summary:
+  - added the first server-side consumer surface for the Wizard-owned household networking policy artifact
+  - added runtime contract-info and validation routes for household network policy consumption
+  - added consumer-side payload validation against the published Wizard policy definitions for `Beacon`, `Crypt`, `Tomb`, and `Home`
+  - updated server-facing docs so the new consumer surface is discoverable from runtime and Beacon-oriented docs
+- validation run:
+  - `cd <workspace-root>/uHOME-server && bash scripts/run-uhome-server-checks.sh` — 150 tests passed
+- policy checks:
+  - `uHOME-server` remains runtime fulfillment owner
+  - `uDOS-wizard` remains networking and secret-backed policy owner
+- promotable outputs:
+  - `uHOME-server/src/uhome_server/wizard_policy.py`
+  - `uHOME-server/src/uhome_server/config.py`
+  - `uHOME-server/src/uhome_server/routes/runtime.py`
+  - `uHOME-server/tests/test_runtime_routes.py`
+  - `uHOME-server/README.md`
+  - `uHOME-server/docs/clients/BEACON-ACTIVATE.md`
+- risks:
+  - client-capability registration remains a separate open server gap
+  - failover/election and richer node-authority contracts remain open beyond this first policy-consumer pass
+- next promotion step:
+  - build the next server-side gap pass around failover and authority contracts, then review whether the Wizard policy consumer surface needs persistence or adoption state beyond validation
