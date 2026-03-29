@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 RUN_DIR="${REPO_ROOT}/.run"
+SHARED_PYTHON_BIN="${UDOS_SHARED_PYTHON_BIN:-}"
+USE_SHARED_RESOURCES="${UDOS_USE_SHARED_RESOURCES:-1}"
 VENV_DIR="${REPO_ROOT}/.venv"
 PYTHON_BIN="${VENV_DIR}/bin/python"
 PORT="${UHOME_PORT:-8000}"
@@ -75,8 +77,22 @@ cd "${REPO_ROOT}"
 echo "Bootstrapping uHOME-server..."
 bash "${SCRIPT_DIR}/run-uhome-server-checks.sh" >/dev/null
 
+if [[ "${USE_SHARED_RESOURCES}" == "1" && -z "${SHARED_PYTHON_BIN}" ]]; then
+  FAMILY_HELPER="${REPO_ROOT}/../scripts/lib/family-python.sh"
+  if [[ -f "${FAMILY_HELPER}" ]]; then
+    # shellcheck source=/dev/null
+    . "${FAMILY_HELPER}"
+    ensure_shared_python
+    SHARED_PYTHON_BIN="${UDOS_SHARED_PYTHON_BIN:-}"
+  fi
+fi
+
+if [[ -n "${SHARED_PYTHON_BIN}" && -x "${SHARED_PYTHON_BIN}" ]]; then
+  PYTHON_BIN="${SHARED_PYTHON_BIN}"
+fi
+
 if [[ ! -x "${PYTHON_BIN}" ]]; then
-  echo "ERROR Missing virtualenv python at ${PYTHON_BIN}" >&2
+  echo "ERROR Missing python interpreter at ${PYTHON_BIN}" >&2
   exit 1
 fi
 

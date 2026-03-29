@@ -119,11 +119,15 @@ else
   fail "Installation may not be complete"
 fi
 
-# Check virtualenv (if applicable)
-if [ -d .venv ]; then
-  if [ -f .venv/bin/activate ]; then
-    pass "Python virtualenv exists at .venv"
-  fi
+# Check runtime python environment (shared lane or local fallback)
+if [ -n "${UDOS_SHARED_PYTHON_BIN:-}" ] && [ -x "${UDOS_SHARED_PYTHON_BIN}" ]; then
+  pass "Shared Python available at ${UDOS_SHARED_PYTHON_BIN}"
+elif [ -x "$HOME/.udos/envs/family-py311/bin/python" ]; then
+  pass "Shared Python available at $HOME/.udos/envs/family-py311/bin/python"
+elif [ -d .venv ] && [ -f .venv/bin/activate ]; then
+  pass "Python virtualenv exists at .venv (standalone mode)"
+else
+  warn "No explicit Python environment detected (.venv absent and shared lane not found)"
 fi
 
 echo ""
