@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Always-on Linux-based uHOME runtime for persistent local-network services,
-scheduling, Steam-server host duties, and local vault viewing or unlock
-surfaces.
+Linux-based `uHOME` service stream for persistent household services,
+scheduling, Steam-server host duties, and ThinUI/local console surfaces built
+on the wider runtime spine.
 
 ## Ownership
 
@@ -22,6 +22,8 @@ surfaces.
 - canonical runtime semantics
 - shell ownership
 - provider bridge ownership
+- primary always-on uDOS command-centre ownership
+- primary browser-GUI ownership
 - Google or HubSpot sync orchestration owned by `uDOS-empire`
 - Apple or iCloud sync ownership owned by the macOS desktop app
 
@@ -43,9 +45,16 @@ Use `QUICKSTART.md` for the first runnable path and use
 
 ## Family Relation
 
-`uHOME-server` provides the always-on local runtime. It complements
-`uDOS-core`, pairs with `uDOS-wizard` for workflow handoff and local execution,
-and leaves Google or HubSpot sync workflows to `uDOS-empire`.
+`uHOME-server` is now the `uHOME` service lane rather than the primary
+definition of the family runtime spine.
+
+The intended family direction is:
+
+- `uDOS-ubuntu` hosts the base always-on command centre
+- `uHOME-server` provides household services and local console/ThinUI flows on
+  top of that runtime
+- `uDOS-wizard` provides publishing, provider, MCP, and assist adapters
+- `uDOS-empire` handles selected external sync and publishing extensions
 
 The v2 split is explicit:
 

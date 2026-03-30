@@ -1,6 +1,7 @@
 # uHOME-server Base Runtime Boundary
 
-`uHOME-server` is the base runtime repo for the active `uHOME` v2 family.
+`uHOME-server` is the `uHOME` service-stream repo for the active `uHOME` v2
+family. It is not the primary family command-centre runtime host.
 
 ## Owns
 
@@ -8,6 +9,7 @@
 - household services, scheduling, and playback surfaces
 - base runtime profiles and checked-in server configuration examples
 - LAN-first runtime routing and service composition
+- local console and ThinUI-oriented `uHOME` service surfaces
 
 ## Transitional Local Support
 
@@ -17,6 +19,7 @@ runtime support owned by the server until it is intentionally migrated.
 
 ## Does Not Own
 
+- the primary Ubuntu-hosted command-centre runtime
 - Matter clone catalogs
 - Home Assistant extension contracts
 - platform UI ownership

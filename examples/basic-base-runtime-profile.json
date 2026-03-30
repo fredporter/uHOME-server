@@ -1,7 +1,7 @@
 {
-  "profile": "uhome-base-runtime",
-  "runtime_owner": "uHOME-server",
-  "mode": "standalone-uhome",
+  "profile": "uhome-downstream-services",
+  "runtime_owner": "uDOS-ubuntu",
+  "mode": "ubuntu-attached-uhome",
   "services": [
     "lan-discovery",
     "launcher"

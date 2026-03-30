@@ -19,22 +19,38 @@ def get_repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def get_code_root() -> Path:
+    return get_repo_root().parents[1]
+
+
+def get_udos_family_root() -> Path:
+    return Path(os.environ.get("UDOS_FAMILY_ROOT", get_code_root() / "uDOS-family"))
+
+
+def get_uhome_family_root() -> Path:
+    return Path(os.environ.get("UDOS_UHOME_FAMILY_ROOT", get_code_root() / "uHOME-family"))
+
+
+def get_sonic_family_root() -> Path:
+    return Path(os.environ.get("UDOS_SONIC_FAMILY_ROOT", get_code_root() / "sonic-family"))
+
+
 def get_workspace_root() -> Path:
-    return get_repo_root().parent
+    return get_uhome_family_root()
 
 
 def get_uhome_matter_root(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_workspace_root()
+    root = workspace_root or get_uhome_family_root()
     return root / "uHOME-matter"
 
 
 def get_uhome_empire_root(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_workspace_root()
+    root = workspace_root or get_udos_family_root()
     return root / "uDOS-empire"
 
 
 def get_udos_wizard_root(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_workspace_root()
+    root = workspace_root or get_udos_family_root()
     return root / "uDOS-wizard"
 
 
@@ -177,12 +193,12 @@ def write_json_file(path: Path, payload: dict[str, Any], indent: int = 2) -> Non
 
 
 def get_sync_record_contract_path(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_workspace_root()
+    root = workspace_root or get_udos_family_root()
     return root / "uDOS-core" / "contracts" / "sync-record-contract.json"
 
 
 def get_sync_record_schema_path(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_workspace_root()
+    root = workspace_root or get_udos_family_root()
     return root / "uDOS-core" / "schemas" / "sync-record-contract.schema.json"
 
 
