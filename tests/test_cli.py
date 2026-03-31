@@ -71,7 +71,7 @@ def _write_bundle(bundle_dir: Path) -> None:
 def test_launcher_cli_writes_state(tmp_path):
     code = launcher_main(["--repo-root", str(tmp_path), "start", "--presentation", "thin-gui"])
     assert code == 0
-    state_path = tmp_path / "memory" / "wizard" / "uhome" / "presentation.json"
+    state_path = tmp_path / "memory" / "kiosk" / "uhome" / "presentation.json"
     payload = json.loads(state_path.read_text(encoding="utf-8"))
     assert payload["active_presentation"] == "thin-gui"
 
@@ -187,7 +187,7 @@ def test_contracts_sync_record_cli(tmp_path):
     assert code == 0
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["version"] == "v2.0.4"
-    assert payload["owner"] == "uDOS-core"
+    assert payload["owner"] == "uHOME-server"
     assert "canonical_contact" in payload["record_types"]
 
 
@@ -196,7 +196,7 @@ def test_main_dispatches_contracts_command(tmp_path):
     code = main(["contracts", "sync-record", "--output", str(output_path)])
     assert code == 0
     payload = json.loads(output_path.read_text(encoding="utf-8"))
-    assert payload["schema_title"] == "uDOS Sync Record Contract"
+    assert payload["schema_title"] == "uHOME Sync Record Contract"
 
 
 def test_contracts_validate_sync_record_cli(tmp_path):

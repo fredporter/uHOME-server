@@ -112,7 +112,7 @@ def create_backup(
             config_backup = backup_path / "config"
             config_backup.mkdir(parents=True, exist_ok=True)
             
-            for config_file in ["uhome.json", "wizard.json"]:
+            for config_file in ["uhome.json", "legacy-uhome.json", "wizard.json"]:
                 source = config_dir / config_file
                 if source.exists():
                     shutil.copy2(source, config_backup / config_file)

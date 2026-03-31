@@ -44,5 +44,5 @@ deployment bootstrap as a product category. When install logic becomes generic
 or hardware-first, it should move toward `sonic-screwdriver`.
 
 Matter, Home Assistant, and local automation contracts should move through
-`uHOME-matter`. Remote webhook-style and container-style job workflows should
-move through `uDOS-empire`.
+`uHOME-matter`. Remote webhook-style and host-local operator jobs are not owned
+by the uHOME stream; see `uDOS-wizard` and `uDOS-ubuntu` documentation.

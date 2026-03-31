@@ -1,12 +1,16 @@
 # uHOME-server Architecture
 
-uHOME-server is the **always-on household infrastructure node** for the uDOS
-family. It is the Linux-based local runtime that owns the local-network runtime,
-kiosk UI host, media services, vault exposure, Beacon Activate content surfaces,
-and Steam-side host role.
+**uHOME-server** is the **household media, console, and LAN server** product: a
+**decentralised** node on the home network that runs **Jellyfin**, a
+**controller-first** kiosk/thin UI, **Steam/Linux** gaming surfaces, a **curated
+library** of games and apps, and **Home Assistant** integration **through the
+same thin UX** (bridge contracts live in `uHOME-matter`).
 
-uHOME-server is designed to operate independently of cloud services, with
-optional integration through the Empire extension.
+Install, recovery, and **dual-boot (Linux uHOME + Windows/Steam)** workflows are
+**driven by `sonic-screwdriver`**—the Ventoy/USB and bootstrap lane—not by
+Empire- or Wizard-centric operator flows.
+
+uHOME is designed **local-first** and without mandatory cloud dependency.
 
 ## Main Areas
 
@@ -26,20 +30,24 @@ optional integration through the Empire extension.
 
 ## Topology
 
-Preferred deployment: Linux host on local network.
+Preferred deployment: **Linux** as the uHOME host on a **normal LAN**
+(consumer or small-office router). The machine may be **dual-boot** with
+**Windows + Steam** for a dedicated gaming/desktop side; **Linux remains the
+orchestration authority** for uHOME (media, kiosk, HA integration, LAN
+services). **`sonic-screwdriver`** is the family path for imaging, Ventoy sticks,
+and bootstrap—not Wizard/Empire.
 
-Linux host owns:
+Linux host typically runs:
 
-- uHOME-server (this repo)
-- Wizard (when deployed)
-- Empire extension
-- Jellyfin media server
-- Matter subsystem (via `uHOME-matter`)
+- **uHOME-server** (this repo) — API, thin UI, scheduling, library surfaces
+- **Jellyfin** — household media library and playback metadata
+- **Home Assistant** (optional) — automation brain; **kiosk surfaces** consume
+  bridge/metadata from `uHOME-matter` contracts
+- **Matter / device adapters** (via `uHOME-matter`)
 
-Windows "toybox" side (optional):
+Windows side (optional dual-boot):
 
-- Steam and auxiliary gaming software
-- Windows is **never** the orchestration authority
+- Steam and auxiliary games/apps; **not** the uHOME server runtime
 
 ---
 
@@ -60,15 +68,17 @@ Gamepad is the **primary interaction model**.
 ### UX Surfaces
 
 **Living-Room Launcher** — tile-based, big-screen-friendly, controller-first.
-Launch targets: media, games, automation, vault content, dashboards.
+Launch targets: **media**, **games** (curated library / Steam), **home
+automation** (HA-backed scenes and status), vault content, dashboards.
 
-**Thin-GUI Kiosk Mode** — can be pushed or streamed to tablets, TVs, and
-secondary displays. Shows: job status, dashboards, playback status, automation panels.
+**Thin-GUI Kiosk Mode** — tablets, TVs, secondary displays. Shows playback,
+queues, **automation status** (Home Assistant–backed where configured), and thin
+job surfaces.
 
 **Media Panel** — Jellyfin library browsing, playback controls, queue management.
 
-**Jobs / Scheduling Panel** — scheduled jobs, automation status, retries/failures.
-Jobs may originate from Empire, Wizard, or local automation scripts.
+**Jobs / Scheduling Panel** — local schedules, automation fulfilment, retries;
+primary story is **uHOME-local** and HA/Matter, not an external command-centre.
 
 ---
 
@@ -96,25 +106,22 @@ uHOME-server supports Steam presence and gaming launch surfaces:
 
 ## Networking Modes
 
-### Default Mode
+### Default: regular LAN
 
-Standard home networking. Supports WiFi, Ethernet, existing routers.
-No Wizard required.
+Ship and run uHOME on a **normal** home or office network: Wi‑Fi or Ethernet,
+consumer or small-business router, private addresses, DNS as provided by the
+LAN. Policy contracts and JSON schema ship **inside** `uHOME-server`
+(`src/uhome_server/contracts/`); no `uDOS-wizard` checkout is required.
 
-### Wizard-Managed Networking
+The bundled **`lan`** profile matches typical router-backed operation. Optional
+profiles (`beacon`, `crypt`, `tomb`, `home`) remain for stricter or alternate
+visibility stories; they describe policy payloads, not custom link layers.
 
-Wizard defines advanced networking profiles. uHOME-server **hosts the runtime
-services** for those profiles.
+### Future: uDOS-ubuntu command-centre
 
-| Profile | Visibility | Access | Internet |
-| --- | --- | --- | --- |
-| Beacon | Public / open | Local vault only | No |
-| Crypt | Visible, password-protected | Local vault | No |
-| Tomb | Hidden, discovery-based | No public internet | No |
-| Home | Private household, password-protected | Household devices | Optional |
-
-Wizard defines policies. uHOME-server owns the runtime network services.
-See `uDOS-wizard/docs/v2.0.4-sibling-route-set.md` for Wizard networking contracts.
+A **later** uHOME release may align or extend these profiles with
+**uDOS-ubuntu** command-centre networking. That is explicitly out of scope for
+the current regular-LAN baseline.
 
 ---
 
@@ -122,34 +129,37 @@ See `uDOS-wizard/docs/v2.0.4-sibling-route-set.md` for Wizard networking contrac
 
 | Extension | Responsibility |
 | --- | --- |
-| `uHOME-matter` | Home Assistant integration, Matter device support, device graph, room/zone logic, scenes and automations |
-| `uDOS-empire` | Vault mirroring, Google API integration, HubSpot API integration, webhook listeners, scheduled jobs, binder-aware routing |
+| `uHOME-matter` | Home Assistant and Matter **contracts**, bridge definitions, clone/target maps—so the **kiosk thin UX** can show **real home state** (rooms, scenes, entities) without reimplementing HA inside the server repo |
 
-Extensions layer on top of uHOME-server without replacing base runtime ownership.
+`uHOME-server` **hosts** the thin presentation; `uHOME-matter` **defines** what
+the runtime is allowed to know about devices and bridges.
 
 ---
 
 ## Contract Edges
 
-- `uDOS-core` defines canonical vault, task, workflow, and binder semantics.
-- `sonic-screwdriver` owns deployment, hardware bootstrap, and install
-  planning into this runtime.
-- `uDOS-wizard` provides network-facing contracts while `uHOME-server` owns the
-  local-network runtime and local Beacon Activate content surfaces.
-- `uHOME-matter` layers on top for Matter and Home Assistant extension
-  contracts without replacing the base runtime owner.
-- `uDOS-empire` layers on top for Google and HubSpot sync plus console CRM and
-  workflow management.
+Family-level sequencing and Wizard/core boundaries: **`uDOS-dev/docs/uhome-stream.md`**
+(operator checkout: `uDOS-family/uDOS-dev`).
+
+- **`sonic-screwdriver`** — **first-class** for getting uHOME onto metal: USB,
+  Ventoy, dual-boot layout, recovery; not an afterthought.
+- **`uHOME-server`** bundles household **network policy** for regular LANs
+  (`src/uhome_server/contracts/`).
+- **`uHOME-matter`** — HA/Matter extension contracts consumed by this runtime.
+- **`uDOS-core`** (when present on disk) — optional **shared** sync-record and
+  workflow **artifact paths** for family compatibility; uHOME remains a
+  **standalone product**, not a subordinate service.
 
 ---
 
 ## Design Principles
 
-- local-first
-- controller-first UX
-- modular extensions
+- local-first, decentralised LAN
+- controller-first UX (kiosk / TUI parity where it matters)
+- curated library + thin presentation (media, games, apps)
+- modular extensions (Matter/HA via `uHOME-matter`)
 - no mandatory cloud dependency
-- server-hosted automation
+- server-hosted automation and scheduling on the uHOME host
 
 ## Transitional Note
 

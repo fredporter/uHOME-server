@@ -15,9 +15,17 @@ SUPPORTED_NODE_ROLES = ("server", "tv-node")
 class UHomePresentationService:
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
-        self.state_dir = self.repo_root / "memory" / "wizard" / "uhome"
-        self.state_path = self.state_dir / "presentation.json"
-        self.state_dir.mkdir(parents=True, exist_ok=True)
+        self._primary_state_dir = self.repo_root / "memory" / "kiosk" / "uhome"
+        self._legacy_state_dir = self.repo_root / "memory" / "wizard" / "uhome"
+        self._primary_state_dir.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def state_path(self) -> Path:
+        primary = self._primary_state_dir / "presentation.json"
+        legacy = self._legacy_state_dir / "presentation.json"
+        if primary.exists():
+            return primary
+        return legacy if legacy.exists() else primary
 
     def _read_state(self) -> dict[str, Any]:
         return read_json_file(
@@ -26,7 +34,8 @@ class UHomePresentationService:
         )
 
     def _write_state(self, payload: dict[str, Any]) -> None:
-        write_json_file(self.state_path, payload, indent=2)
+        target = self._primary_state_dir / "presentation.json"
+        write_json_file(target, payload, indent=2)
 
     def _workspace_fields(self) -> dict[str, str]:
         return get_template_workspace_service(self.repo_root).read_fields("settings", "uhome")
@@ -74,7 +83,11 @@ class UHomePresentationService:
                 "launcher": launcher,
                 "workspace": "uhome",
                 "profile_id": node_role,
-                "auth": {"wizard_mode_active": False, "uhome_role": node_role},
+                "auth": {
+                    "kiosk_local_session": True,
+                    "wizard_mode_active": False,
+                    "uhome_role": node_role,
+                },
             },
             "action": action,
             "status": "ready" if action == "start" else "stopped",

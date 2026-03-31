@@ -54,7 +54,7 @@ class AutomationStore:
             "job_id": payload.get("job_id") or f"job:{utc_now_iso_z()}",
             "requested_capability": payload.get("requested_capability") or "local-task",
             "payload_ref": payload.get("payload_ref") or "memory://pending",
-            "origin_surface": payload.get("origin_surface") or "uDOS-wizard",
+            "origin_surface": payload.get("origin_surface") or "uHOME-kiosk",
             "policy_flags": payload.get("policy_flags") or {},
             "queued_at": payload.get("queued_at") or utc_now_iso_z(),
         }

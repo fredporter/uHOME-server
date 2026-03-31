@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import urllib.request
 import uuid
@@ -42,14 +43,27 @@ def _save_json_list(path: Path, payload: list[dict[str, Any]]) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def tuner_discover(params: dict[str, Any]) -> dict[str, Any]:
-    devices: list[dict[str, Any]] = []
-    candidates = [params.get("host") or "hdhomerun.local", "192.168.1.1"]
+def _tuner_discovery_hosts(params: dict[str, Any]) -> list[str]:
+    """Resolve HDHomeRun probe order: explicit param, config/env host, extras, then mDNS name."""
+    ordered: list[str] = []
+    param_host = str(params.get("host") or "").strip()
+    if param_host:
+        ordered.append(param_host)
     env_host = str(_config.get("HDHOMERUN_HOST", "") or "").strip()
     if env_host:
-        candidates.insert(0, env_host)
+        ordered.append(env_host)
+    extra_raw = str(os.environ.get("UHOME_TUNER_DISCOVERY_EXTRA_HOSTS", "") or "").strip()
+    if extra_raw:
+        ordered.extend(part.strip() for part in extra_raw.split(",") if part.strip())
+    ordered.append("hdhomerun.local")
+    return list(dict.fromkeys(ordered))
 
-    for host in dict.fromkeys(candidates):
+
+def tuner_discover(params: dict[str, Any]) -> dict[str, Any]:
+    devices: list[dict[str, Any]] = []
+    candidates = _tuner_discovery_hosts(params)
+
+    for host in candidates:
         try:
             ip = socket.gethostbyname(host)
             with urllib.request.urlopen(f"http://{ip}/discover.json", timeout=2) as resp:
@@ -159,7 +173,7 @@ def ad_get_mode(params: dict[str, Any]) -> dict[str, Any]:
         config_mode = str(_config.get(_AD_MODE_KEY, mode) or mode).strip().lower()
         if config_mode in _AD_MODES:
             mode = config_mode
-            source = "wizard_config"
+            source = "uhome_config"
 
     return {
         "command": "uhome.ad_processing.get_mode",

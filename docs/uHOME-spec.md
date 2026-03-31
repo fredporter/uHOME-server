@@ -5,12 +5,17 @@ Updated: 2026-03-03
 
 ## Purpose
 
-uHOME defines the home-media and home-operations lane for uDOS:
+uHOME defines the **home media, console, and LAN hub**—a **standalone product**,
+not a sub-lane of uDOS:
 
-- local broadcast/media ingestion
-- DVR and post-processing workflows
-- LAN-served playback and household access
-- Sonic-installed packaging for home deployments
+- media playback and LAN-served libraries (e.g. Jellyfin)
+- controller-first **kiosk / thin UX** (living-room and tablet)
+- **decentralised** household server on the normal home network
+- **Dual-boot** friendly (Linux uHOME + optional Windows/Steam) with
+  **`sonic-screwdriver`** as the install/recovery path
+- **Curated** on-disk library of games and apps
+- **Home Assistant** integrated **through the thin UX**, with contracts in
+  `uHOME-matter`
 
 This is an active decision doc for the home profile direction, not a full
 implementation manual. Historical implementation detail remains in
@@ -28,8 +33,8 @@ That v2 architecture surface now captures:
 - always-on local household runtime ownership
 - controller-first kiosk and launcher model
 - Jellyfin media lane and Steam-side game surfaces
-- networking profile split (`Beacon`, `Crypt`, `Tomb`, `Home`)
-- extension split across `uHOME-matter` and `uDOS-empire`
+- bundled LAN network policy profiles (including default **`lan`**)
+- automation extension owned by `uHOME-matter`
 
 This decision file remains useful for historical lane context, while v2 runtime
 shape should be read from `docs/architecture.md` first.
@@ -39,9 +44,10 @@ shape should be read from `docs/architecture.md` first.
 uHOME remains:
 
 - local-first
-- LAN-oriented
-- Sonic-installed
-- compatible with Wizard-managed scheduling and job execution
+- LAN-oriented and decentralised on the home network
+- Sonic-bootstrap friendly (USB/Ventoy/dual-boot via `sonic-screwdriver`)
+- controller-first kiosk and media/console experience
+- Home Assistant aware **via thin UX** and `uHOME-matter` contracts
 - separate from cloud-dependent media stacks
 
 For v1.5, the canonical `uHOME` product shape is:
@@ -79,9 +85,13 @@ uHOME supports:
 
 ### Runtime ownership
 
-- `core` owns deterministic local parsing, command behavior, and offline-safe transforms
-- `wizard` owns managed jobs, schedule orchestration, remote/control-plane surfaces, and any network-aware services
-- Sonic owns install and packaging behavior for supported home profile deployments
+- **`uHOME-server`** owns the household Linux runtime: media, kiosk/thin UX,
+  LAN services, local scheduling, and thin automation fulfilment on the box.
+- **`uHOME-matter`** owns Home Assistant / Matter **contracts** fed into that UX.
+- **`sonic-screwdriver`** owns **install, recovery, Ventoy/USB, and dual-boot**
+  bootstrap **into** uHOME—not Empire/Wizard as the install story.
+- Shared **`uDOS-core`** artifacts (when used) are **compatibility** for envelope
+  shapes, not product ownership of uHOME.
 
 ## v1.5 Release Direction
 
@@ -91,9 +101,8 @@ For v1.5, uHOME work is focused on:
 - DVR and post-processing lane definition
 - Sonic-installed home profile behavior
 - thin-GUI and Steam-console presentation alignment for living-room use
-- alignment with Wizard scheduling and job control
-- standalone home deployment viability where `uHOME` or Sonic ship without the
-  full monorepo runtime
+- **standalone** home deployment: uHOME + Sonic without assuming a monorepo or
+  external command-centre
 
 The older hybrid-console and broad appliance exploration docs are not the
 canonical v1.5 source of truth unless a shipped surface is explicitly promoted
@@ -106,7 +115,8 @@ This lane should not block the general v1.5 release beyond the specific home-pro
 - local media remains the primary operational model
 - household playback must work over LAN without requiring cloud mediation
 - install and packaging rules must remain explicit and profile-aware
-- home-profile workflows must align with the core vs Wizard boundary
+- home-profile workflows stay **local-first** and **kiosk-visible**; optional
+  cross-repo contracts do not redefine the product
 
 ## Related Documents
 
@@ -114,4 +124,3 @@ This lane should not block the general v1.5 release beyond the specific home-pro
 - `docs/STATUS.md`
 - `docs/decisions/HOME-ASSISTANT-BRIDGE.md`
 - `docs/decisions/SONIC-DB-SPEC-GPU-PROFILES.md`
-- `docs/decisions/WIZARD-SERVICE-SPLIT-MAP.md`

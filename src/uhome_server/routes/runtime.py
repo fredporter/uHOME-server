@@ -11,14 +11,12 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from uhome_server.config import (
-    get_empire_container_job_catalog_path,
     get_repo_root,
     get_runtime_settings,
     get_sync_record_contract_path,
     get_sync_record_schema_path,
     get_uhome_network_policy_contract_path,
     get_uhome_network_policy_schema_path,
-    load_empire_container_job_catalog,
     load_sync_record_contract,
     load_sync_record_schema,
     load_uhome_network_policy_contract,
@@ -31,7 +29,7 @@ from uhome_server.sync_records import (
     validation_error_payload,
 )
 from uhome_server.sync_store import get_sync_record_store
-from uhome_server.wizard_policy import (
+from uhome_server.uhome_network_policy import (
     uhome_network_policy_validation_error,
     validate_uhome_network_policy_payload,
 )
@@ -99,7 +97,13 @@ def _jellyfin_status() -> dict[str, Any]:
 
 def _config_status() -> dict[str, Any]:
     settings = get_runtime_settings(get_repo_root())
-    active_config_path = settings.config_path if settings.config_path.exists() else settings.legacy_config_path
+    legacy_uhome = settings.config_path.with_name("legacy-uhome.json")
+    if settings.config_path.exists():
+        active_config_path = settings.config_path
+    elif legacy_uhome.exists():
+        active_config_path = legacy_uhome
+    else:
+        active_config_path = settings.legacy_config_path
     return {
         "config_path": str(settings.config_path),
         "legacy_config_path": str(settings.legacy_config_path),
@@ -140,7 +144,6 @@ def runtime_readiness_probe() -> dict[str, Any]:
 def runtime_info() -> dict[str, Any]:
     repo_root = get_repo_root()
     settings = get_runtime_settings(repo_root)
-    empire_jobs = load_empire_container_job_catalog()
     return {
         "app": "uHOME Server",
         "timestamp": utc_now_iso_z(),
@@ -150,10 +153,6 @@ def runtime_info() -> dict[str, Any]:
         "repo_root": str(repo_root),
         "cwd": str(Path.cwd()),
         "settings": settings.to_dict(),
-        "integration_contracts": {
-            "empire_container_job_catalog_source": str(get_empire_container_job_catalog_path()),
-            "empire_container_job_count": len(empire_jobs.get("jobs", [])),
-        },
     }
 
 
@@ -174,13 +173,15 @@ def sync_record_contract_info() -> dict[str, Any]:
 
 
 def workflow_automation_contract_info() -> dict[str, Any]:
+    base = "uhome_server/contracts"
     return {
-        "workflow_state_contract": "uDOS-core/contracts/workflow-state-contract.json",
-        "workflow_action_contract": "uDOS-core/contracts/workflow-action-contract.json",
-        "automation_job_contract": "uDOS-core/contracts/automation-job-contract.json",
-        "automation_result_contract": "uDOS-core/contracts/automation-result-contract.json",
-        "workflow_owner": "uDOS-wizard",
+        "workflow_state_contract": f"{base}/workflow-state-contract.json",
+        "workflow_action_contract": f"{base}/workflow-action-contract.json",
+        "automation_job_contract": f"{base}/automation-job-contract.json",
+        "automation_result_contract": f"{base}/automation-result-contract.json",
+        "workflow_owner": "uHOME-server",
         "automation_fulfillment_owner": "uHOME-server",
+        "integration_note": "Standalone uHOME fulfils automation on-box; optional external workflow tools are not required.",
     }
 
 
@@ -200,7 +201,10 @@ def uhome_network_policy_contract_info() -> dict[str, Any]:
         "profiles": sorted(profiles.keys()),
         "runtime_owners": sorted({str(item.get("runtime_owner")) for item in profiles.values()}),
         "policy_owners": sorted({str(item.get("policy_owner")) for item in profiles.values()}),
-        "wizard_routes": contract.get("routes", {}),
+        "routes": contract.get("routes", {}),
+        "networking_model": contract.get("networking_model"),
+        "deployment": contract.get("deployment"),
+        "future_integration": contract.get("future_integration"),
     }
 
 
@@ -389,6 +393,10 @@ def create_runtime_routes(auth_guard: Optional[Callable] = None) -> APIRouter:
     @router.get("/contracts/uhome-network-policy", dependencies=dependencies)
     async def uhome_network_policy_contract():
         return uhome_network_policy_contract_info()
+
+    @router.get("/contracts/uhome-network-policy/schema", dependencies=dependencies)
+    async def uhome_network_policy_schema():
+        return load_uhome_network_policy_schema()
 
     @router.post("/contracts/uhome-network-policy/validate", dependencies=dependencies)
     async def validate_uhome_network_policy(payload: dict[str, Any] = Body(...)):

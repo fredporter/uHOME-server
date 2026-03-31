@@ -25,11 +25,20 @@ def test_bootstrap_runtime_creates_expected_paths(tmp_path):
     assert report["legacy_config_fallback"] is False
 
 
-def test_json_config_store_uses_legacy_fallback(tmp_path):
+def test_json_config_store_uses_wizard_fallback(tmp_path):
     legacy_path = tmp_path / "memory" / "config" / "wizard.json"
     legacy_path.parent.mkdir(parents=True, exist_ok=True)
     legacy_path.write_text(json.dumps({"ha_bridge_enabled": True}), encoding="utf-8")
     store = JSONConfigStore(path=tmp_path / "memory" / "config" / "uhome.json")
+    assert store.get("ha_bridge_enabled", False) is True
+
+
+def test_json_config_store_prefers_legacy_uhome_over_wizard(tmp_path):
+    base = tmp_path / "memory" / "config"
+    base.mkdir(parents=True, exist_ok=True)
+    (base / "legacy-uhome.json").write_text(json.dumps({"ha_bridge_enabled": True}), encoding="utf-8")
+    (base / "wizard.json").write_text(json.dumps({"ha_bridge_enabled": False}), encoding="utf-8")
+    store = JSONConfigStore(path=base / "uhome.json")
     assert store.get("ha_bridge_enabled", False) is True
 
 

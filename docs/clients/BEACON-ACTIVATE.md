@@ -94,7 +94,7 @@ These Beacon Activate surfaces are separate from:
 
 - Home Assistant bridges
 - Matter or device-control automation
-- `uDOS-empire` online webhook or API automation
+- Wizard- or Ubuntu-hosted online surfaces that are outside the uHOME stream
 
 Those systems may appear behind the portal, but they are not the same contract.
 
@@ -108,11 +108,11 @@ As `uHOME-server` implementation hardens, this doc should grow into:
 - household-safe content projection rules
 - host-curated offline library packaging guidance
 
-The first server-side consumer route for Wizard household networking policy is
-now exposed through:
+Household networking policy for **regular LAN** operation is exposed through:
 
 - `GET /api/runtime/contracts/uhome-network-policy`
+- `GET /api/runtime/contracts/uhome-network-policy/schema`
 - `POST /api/runtime/contracts/uhome-network-policy/validate`
 
-This keeps `uHOME-server` in the runtime-consumer role while `uDOS-wizard`
-remains the policy owner for `Beacon`, `Crypt`, `Tomb`, and `Home`.
+`uHOME-server` ships the contract and schema; the default profile is **`lan`**.
+Future work may link profiles to **uDOS-ubuntu** command-centre networking.

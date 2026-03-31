@@ -1,4 +1,4 @@
-"""Typed sync-record models aligned to the shared uDOS sync contract."""
+"""Typed sync-record models aligned to the uHOME-bundled sync-record contract."""
 
 from __future__ import annotations
 

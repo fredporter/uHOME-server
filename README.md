@@ -2,30 +2,34 @@
 
 ## Purpose
 
-Linux-based `uHOME` service stream for persistent household services,
-scheduling, Steam-server host duties, and ThinUI/local console surfaces built
-on the wider runtime spine.
+**uHOME** is a **home media and living-room computer**: a **media player**,
+**controller-first** console/kiosk **TUI and thin-GUI**, and **decentralised
+LAN server** for the household. It targets a **dual-role machine**—typically
+**Linux** for uHOME plus an optional **Windows + Steam** side—installed and
+refreshed through **`sonic-screwdriver`** (Ventoy/USB, recovery, and bootstrap),
+**not** through Empire- or Wizard-centric flows.
+
+The same stack offers a **curated on-disk library** of games and apps (vault /
+library surfaces), **Jellyfin** playback, and **home automation** via **Home
+Assistant**, surfaced through the **kiosk-style thin UX** (with `uHOME-matter`
+owning bridge contracts and adapter assets).
 
 ## Ownership
 
-- local-network services
-- persistent scheduling
-- automation fulfillment
-- service modules
-- home and server infrastructure surfaces
-- Linux-side Steam server host runtime
-- Thin GUI and kiosk-style local presentation shells
-- local Vault Reader and Beacon Activate offline-library surfaces
+- LAN-first household server (decentralised on your network, not a cloud hub)
+- media playback, library, and presentation scheduling
+- controller-first kiosk / thin console surfaces (TV, tablet, living room)
+- Steam/Linux game-host and launcher integration on the Linux side
+- automation job fulfilment **inside** uHOME’s thin automation lane
+- curated library, vault reader, and Beacon-style offline content surfaces
+- integration **hooks** for Home Assistant and Matter (contracts in `uHOME-matter`)
 
 ## Non-Goals
 
-- canonical runtime semantics
-- shell ownership
-- provider bridge ownership
-- primary always-on uDOS command-centre ownership
-- primary browser-GUI ownership
-- Google or HubSpot sync orchestration owned by `uDOS-empire`
-- Apple or iCloud sync ownership owned by the macOS desktop app
+- generic USB/installer **product** (that stays with `sonic-screwdriver`)
+- canonical family-wide runtime semantics (shared contracts may still align with `uDOS-core` where useful)
+- macOS/iCloud-first sync (owned by Apple platform apps elsewhere)
+- replacing a full desktop browser OS (kiosk/thin surfaces are intentional)
 
 ## Spine
 
@@ -45,36 +49,32 @@ Use `QUICKSTART.md` for the first runnable path and use
 
 ## Family Relation
 
-`uHOME-server` is now the `uHOME` service lane rather than the primary
-definition of the family runtime spine.
+**uHOME** is its **own product**: a media + console + LAN + automation hub for
+the home. It is **not** defined as a sub-part of uDOS; cross-repo contracts
+(e.g. sync-record shapes) are **compatibility layers**, not ownership.
 
-The intended family direction is:
+Partners and siblings:
 
-- `uDOS-ubuntu` hosts the base always-on command centre
-- `uHOME-server` provides household services and local console/ThinUI flows on
-  top of that runtime
-- `uDOS-wizard` provides publishing, provider, MCP, and assist adapters
-- `uDOS-empire` handles selected external sync and publishing extensions
-
-The v2 split is explicit:
-
-- `uHOME-server` owns the base runtime, scheduling, household services, and
-  persistent local execution
-- `uHOME-server` owns Thin GUI and kiosk-style local presentation contracts
-- `uDOS-wizard` owns workflow authority, online assist, and the browser
-  operator GUI
-- `uHOME-matter` owns Matter, Home Assistant, and local automation extension
-  contracts
-- `uHOME-client` and app repos consume runtime contracts without taking over
-  server ownership
+- **`sonic-screwdriver`** — install, recovery, dual-boot, and hardware bootstrap
+  **into** uHOME (this pass treats Sonic as in-scope; Empire/Wizard are not the
+  install story).
+- **`uHOME-matter`** — Home Assistant and Matter **contracts** and bridge assets;
+  the **kiosk thin UX** on `uHOME-server` is where operators **see** automation
+  alongside media and games.
+- **`uHOME-client`** and **mobile app repos** — remote/control clients; they do
+  not own the household server role.
+- **Household network policy** for normal LANs ships **in this repo**
+  (`src/uhome_server/contracts/`). Optional alignment with other family hosts
+  (e.g. Ubuntu command-centre) is **future**, not the product definition.
 
 ## Transitional Runtime Note
 
-The existing standalone runtime and installer flow remain in `src/uhome_server/` and related legacy-support roots such as `apps/`, `courses/`, `defaults/`, `examples/`, `library/`, `memory/`, and `vault/`.
+The runnable server and installer-adjacent flow remain in `src/uhome_server/` and
+legacy-support roots such as `apps/`, `courses/`, `defaults/`, `examples/`,
+`library/`, `memory/`, and `vault/`—including **curated library** and kiosk
+surfaces that predate the current doc framing.
 
-This preserves the pre-existing remote history while the repo converges on the v2 scaffold and boundary model.
-
-For the base/runtime boundary itself, see `docs/base-runtime-boundary.md`.
+For runtime vs Sonic vs `uHOME-matter` boundaries, see `docs/base-runtime-boundary.md`.
 
 ## Quick Start
 
@@ -106,9 +106,8 @@ curl http://localhost:8000/api/health
 curl http://localhost:8000/api/runtime/ready
 ```
 
-For the full runtime, Wizard pairing, and Empire bridge path, see
-`QUICKSTART.md`, `FIRST-TIME-INSTALL.md`, and the legacy documentation
-preserved under `docs/`.
+For local runtime bring-up (server, Jellyfin, kiosk), see `QUICKSTART.md`,
+`FIRST-TIME-INSTALL.md`, and the documentation tree under `docs/`.
 
 For operator env vars and preflight host checks, use
 `docs/ENVIRONMENT-CONFIGURATION.md` and `bash scripts/check-prereqs.sh`.
@@ -138,9 +137,12 @@ GET /api/runtime/sync-records/latest
 GET /api/runtime/sync-records
 ```
 
-Wizard-owned household networking policy consumption surfaces are available at:
+Bundled household networking policy (regular LAN; **`lan`** is the default profile) is available at:
 
 ```bash
 GET /api/runtime/contracts/uhome-network-policy
+GET /api/runtime/contracts/uhome-network-policy/schema
 POST /api/runtime/contracts/uhome-network-policy/validate
 ```
+
+Contracts live under `src/uhome_server/contracts/`. A future version may align with **uDOS-ubuntu** command-centre networking.

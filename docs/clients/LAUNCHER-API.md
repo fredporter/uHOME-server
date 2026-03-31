@@ -41,7 +41,7 @@ Host: uhome-server.local:8090
   "preferred_presentation_source": "template_workspace",
   "node_role": "tv-node",
   "node_role_source": "template_workspace",
-  "state_path": "/path/to/memory/wizard/uhome/presentation.json",
+  "state_path": "/path/to/memory/kiosk/uhome/presentation.json",
   "updated_at": "2026-03-10T15:30:00Z",
   "session_id": "abc123def456"
 }
@@ -417,8 +417,10 @@ console.log('Stopped at:', stopResponse.updated_at);
 
 Launcher session state is persisted to disk at:
 ```
-{repo_root}/memory/wizard/uhome/presentation.json
+{repo_root}/memory/kiosk/uhome/presentation.json
 ```
+
+Older installs may still have state under `{repo_root}/memory/wizard/uhome/presentation.json`; the server reads that path until data is migrated by a new write.
 
 Example state file:
 ```json
@@ -436,6 +438,7 @@ Example state file:
       "workspace": "uhome",
       "profile_id": "tv-node",
       "auth": {
+        "kiosk_local_session": true,
         "wizard_mode_active": false,
         "uhome_role": "tv-node"
       }

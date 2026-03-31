@@ -1,16 +1,19 @@
 # Pathway
 
-`uHOME-server` is the local-network home infrastructure pathway in the wider
-`uDOS` family.
+`uHOME-server` is the **uHOME product** pathway: **media + controller-first
+kiosk + decentralised LAN server + Steam/Linux gaming + curated library**, with
+**Home Assistant** surfaced through the **thin UX** (`uHOME-matter` owns bridge
+contracts).
 
-The pathway framing should stay consistent with sibling repos:
+Framing alongside siblings:
 
-- `uDOS-core` = core runtime and shared contracts
-- `uDOS-shell` / `uDOS-wizard` = interaction and assist surfaces
-- `sonic-screwdriver` = deployment and hardware bootstrap
-- `uHOME-server` = home infrastructure runtime and household service model
-- `uHOME-matter` = local automation and bridge extension lane
-- `uDOS-empire` = remote sync, webhook, and container-style workflow lane
+- **`sonic-screwdriver`** = install, recovery, dual-boot, Ventoy—**in this product
+  story**, the bootstrap partner (not Empire/Wizard).
+- **`uHOME-matter`** = Matter + Home Assistant **contracts** for kiosk-visible
+  automation.
+- **`uHOME-client` / apps** = remotes and companions; not the household server.
+- **`uDOS-core`** (optional) = shared JSON/contract **compatibility** where the
+  family still aligns—uHOME is **not** defined as a sub-part of uDOS.
 
-This repo should not read like a second core and should not absorb generic
-deployment ownership that belongs in `sonic-screwdriver`.
+This repo should not absorb **generic** USB installer product scope that belongs
+in `sonic-screwdriver`.

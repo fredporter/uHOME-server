@@ -24,9 +24,3 @@ which adapter profile it uses, it belongs in `uHOME-matter`.
 
 If a change defines how the server starts, supervises, probes, or exposes that
 integration at runtime, it belongs in `uHOME-server`.
-
-## Empire Preparation
-
-This split leaves `uDOS-empire` free to own remote webhook-style flows,
-queueable automation packages, and zapier-like container or job definitions
-without also absorbing local household bridge ownership.

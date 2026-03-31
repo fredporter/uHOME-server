@@ -1,4 +1,4 @@
-"""Consumer-side validation for Wizard-owned household networking policy."""
+"""Validation for uHOME-bundled household networking policy (regular LAN by default)."""
 
 from __future__ import annotations
 
@@ -11,15 +11,15 @@ from uhome_server.config import load_uhome_network_policy_contract
 
 class UHomeNetworkPolicyPayload(BaseModel):
     contract_version: Literal["v2.0.4"]
-    profile_id: Literal["beacon", "crypt", "tomb", "home"]
+    profile_id: Literal["lan", "beacon", "crypt", "tomb", "home"]
     network_scope: Literal["public", "private", "household"]
     visibility: Literal["visible", "hidden"]
     auth_mode: Literal["open", "password-protected", "discovery-based"]
     vault_access: Literal["local-only"]
     internet_sharing: Literal["disabled"]
     runtime_owner: Literal["uHOME-server"]
-    policy_owner: Literal["uDOS-wizard"]
-    consumer_repos: list[Literal["uHOME-server", "uDOS-empire", "sonic-screwdriver"]] = Field(min_length=1)
+    policy_owner: Literal["uHOME-server"]
+    consumer_repos: list[Literal["uHOME-server", "sonic-screwdriver"]] = Field(min_length=1)
     secret_refs: list[str] = Field(default_factory=list)
     notes: Optional[str] = None
 

@@ -23,12 +23,11 @@ def get_code_root() -> Path:
     return get_repo_root().parents[1]
 
 
-def get_udos_family_root() -> Path:
-    return Path(os.environ.get("UDOS_FAMILY_ROOT", get_code_root() / "uDOS-family"))
-
-
 def get_uhome_family_root() -> Path:
-    return Path(os.environ.get("UDOS_UHOME_FAMILY_ROOT", get_code_root() / "uHOME-family"))
+    explicit = os.environ.get("UHOME_FAMILY_ROOT") or os.environ.get("UDOS_UHOME_FAMILY_ROOT")
+    if explicit:
+        return Path(explicit)
+    return get_code_root() / "uHOME-family"
 
 
 def get_sonic_family_root() -> Path:
@@ -44,14 +43,12 @@ def get_uhome_matter_root(workspace_root: Path | None = None) -> Path:
     return root / "uHOME-matter"
 
 
-def get_uhome_empire_root(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_udos_family_root()
-    return root / "uDOS-empire"
+def _uhome_bundled_contracts_dir() -> Path:
+    return Path(__file__).resolve().parent / "contracts"
 
 
-def get_udos_wizard_root(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_udos_family_root()
-    return root / "uDOS-wizard"
+def _uhome_network_policy_contracts_dir() -> Path:
+    return _uhome_bundled_contracts_dir()
 
 
 def utc_now_iso_z() -> str:
@@ -134,8 +131,12 @@ def bootstrap_runtime(repo_root: Path | None = None) -> dict[str, Any]:
             created_paths.append(str(path))
 
     active_config_path = settings.config_path
-    if not active_config_path.exists() and settings.legacy_config_path.exists():
-        active_config_path = settings.legacy_config_path
+    if not active_config_path.exists():
+        legacy_uhome = settings.config_path.with_name("legacy-uhome.json")
+        if legacy_uhome.exists():
+            active_config_path = legacy_uhome
+        elif settings.legacy_config_path.exists():
+            active_config_path = settings.legacy_config_path
 
     return {
         "ok": True,
@@ -154,9 +155,12 @@ class JSONConfigStore:
         self.path = path or settings.config_path
         self.legacy_path = self.path.with_name("wizard.json") if path is not None else settings.legacy_config_path
 
+    def _config_candidates(self) -> list[Path]:
+        return [self.path, self.path.with_name("legacy-uhome.json"), self.legacy_path]
+
     def _load(self) -> dict[str, Any]:
-        active_path = self.path if self.path.exists() else self.legacy_path
-        if not active_path.exists():
+        active_path = next((p for p in self._config_candidates() if p.exists()), None)
+        if active_path is None:
             return {}
         try:
             return json.loads(active_path.read_text(encoding="utf-8"))
@@ -193,13 +197,19 @@ def write_json_file(path: Path, payload: dict[str, Any], indent: int = 2) -> Non
 
 
 def get_sync_record_contract_path(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_udos_family_root()
-    return root / "uDOS-core" / "contracts" / "sync-record-contract.json"
+    _ = workspace_root  # reserved for tests / future overrides
+    env_path = os.environ.get("UHOME_SYNC_RECORD_CONTRACT_PATH")
+    if env_path:
+        return Path(env_path)
+    return _uhome_bundled_contracts_dir() / "sync-record-contract.json"
 
 
 def get_sync_record_schema_path(workspace_root: Path | None = None) -> Path:
-    root = workspace_root or get_udos_family_root()
-    return root / "uDOS-core" / "schemas" / "sync-record-contract.schema.json"
+    _ = workspace_root
+    env_path = os.environ.get("UHOME_SYNC_RECORD_SCHEMA_PATH")
+    if env_path:
+        return Path(env_path)
+    return _uhome_bundled_contracts_dir() / "sync-record-contract.schema.json"
 
 
 def load_sync_record_contract(workspace_root: Path | None = None) -> dict[str, Any]:
@@ -230,36 +240,30 @@ def load_home_assistant_bridge_definition(workspace_root: Path | None = None) ->
     return data
 
 
-def get_uhome_network_policy_contract_path(workspace_root: Path | None = None) -> Path:
-    return get_udos_wizard_root(workspace_root) / "contracts" / "uhome-network-policy-contract.json"
+def get_uhome_network_policy_contract_path() -> Path:
+    env_path = os.environ.get("UHOME_NETWORK_POLICY_CONTRACT_PATH")
+    if env_path:
+        return Path(env_path)
+    return _uhome_network_policy_contracts_dir() / "uhome-network-policy-contract.json"
 
 
-def get_uhome_network_policy_schema_path(workspace_root: Path | None = None) -> Path:
-    return get_udos_wizard_root(workspace_root) / "contracts" / "uhome-network-policy.schema.json"
+def get_uhome_network_policy_schema_path() -> Path:
+    env_path = os.environ.get("UHOME_NETWORK_POLICY_SCHEMA_PATH")
+    if env_path:
+        return Path(env_path)
+    return _uhome_network_policy_contracts_dir() / "uhome-network-policy.schema.json"
 
 
-def load_uhome_network_policy_contract(workspace_root: Path | None = None) -> dict[str, Any]:
-    path = get_uhome_network_policy_contract_path(workspace_root)
+def load_uhome_network_policy_contract() -> dict[str, Any]:
+    path = get_uhome_network_policy_contract_path()
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"Expected JSON object in {path}")
     return data
 
 
-def load_uhome_network_policy_schema(workspace_root: Path | None = None) -> dict[str, Any]:
-    path = get_uhome_network_policy_schema_path(workspace_root)
-    data = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError(f"Expected JSON object in {path}")
-    return data
-
-
-def get_empire_container_job_catalog_path(workspace_root: Path | None = None) -> Path:
-    return get_uhome_empire_root(workspace_root) / "src" / "containers" / "container-job-catalog.json"
-
-
-def load_empire_container_job_catalog(workspace_root: Path | None = None) -> dict[str, Any]:
-    path = get_empire_container_job_catalog_path(workspace_root)
+def load_uhome_network_policy_schema() -> dict[str, Any]:
+    path = get_uhome_network_policy_schema_path()
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"Expected JSON object in {path}")

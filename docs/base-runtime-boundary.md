@@ -1,29 +1,32 @@
 # uHOME-server Base Runtime Boundary
 
-`uHOME-server` is the `uHOME` service-stream repo for the active `uHOME` v2
-family. It is not the primary family command-centre runtime host.
+`uHOME-server` is the **runtime repo for the uHOME product**: media player,
+controller-first kiosk/thin UI, decentralised LAN server, Steam/Linux gaming
+surfaces, and **presentation** of home automation (fed by `uHOME-matter`). It is
+**not** the generic Sonic/Ventoy installer product—that stays in
+`sonic-screwdriver`, which is the **bootstrap partner** for dual-boot and
+recovery.
 
 ## Owns
 
-- host lifecycle and persistent local execution
-- household services, scheduling, and playback surfaces
-- base runtime profiles and checked-in server configuration examples
-- LAN-first runtime routing and service composition
-- local console and ThinUI-oriented `uHOME` service surfaces
+- host lifecycle and persistent local execution on the uHOME Linux role
+- media, playback, scheduling, and thin console surfaces
+- LAN-first routing and household service composition
+- curated library / vault reader flows exposed through the kiosk UX
+- automation **fulfilment** and job queues **on this host** (thin automation lane)
 
 ## Transitional Local Support
 
-Some Home Assistant and bridge-oriented implementation still exists in this
-repo for continuity with the existing runtime history. Treat that code as
-runtime support owned by the server until it is intentionally migrated.
+Some Home Assistant bridge code still lives here historically; new **contracts**
+and adapter catalogs belong in **`uHOME-matter`**, while the **kiosk** remains
+the operator-visible surface on this repo.
 
 ## Does Not Own
 
-- the primary Ubuntu-hosted command-centre runtime
-- Matter clone catalogs
-- Home Assistant extension contracts
-- platform UI ownership
-- optional cloud sync or publishing workflows
+- USB/Ventoy **installer product** semantics (`sonic-screwdriver`)
+- Matter clone catalogs and HA bridge **contract** ownership (`uHOME-matter`)
+- mobile/TV **client apps** as the server (`uHOME-client` / app repos)
+- optional cross-family operator tooling unrelated to the home media/console role
 
-Those surfaces belong in `uHOME-matter`, app repos, and `uDOS-empire`
-respectively.
+Cross-repo **compatibility** (e.g. shared JSON contract shapes) may still exist;
+they do **not** redefine uHOME as a sub-service of another product.

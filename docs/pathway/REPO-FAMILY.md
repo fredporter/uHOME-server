@@ -2,96 +2,72 @@
 
 Status: active
 
-This document defines how `uHOME-server` should read as a sibling pathway repo
-inside the wider `uDOS` family.
+This document defines how `uHOME-server` sits **next to** other repos: **uHOME
+is its own product** (media, kiosk, LAN server, dual-boot-friendly, HA in thin
+UX). Shared uDOS repos are **compatibility and education** neighbours, not the
+definition of uHOME.
 
 ## Shared Questions
 
-Every sibling repo should answer the same onboarding questions in the same
-order:
+Every repo should still answer:
 
-1. What pathway does this repo provide?
-2. What Markdown or vault surfaces does it read or write?
+1. What product or pathway does this repo provide?
+2. What surfaces does it read or write?
 3. What services does it expose?
 4. What modules are optional?
-5. How does it connect back to `uDOS-core`?
+5. What **optional** shared contracts does it consume (if any)?
 
-## Family Roles
-
-### `uDOS-core`
-
-Owns:
-
-- core runtime
-- shared contracts
-- deterministic execution semantics
-- family-wide education framing
-
-### `uDOS-shell` and `uDOS-wizard`
-
-Own:
-
-- interactive shell and workspace surfaces
-- provider, network, MCP, and assist workflows
+## Family Roles (uHOME-centric)
 
 ### `uHOME-server`
 
 Owns:
 
-- local-network home infrastructure runtime
-- household service model
-- launcher and dashboard server control
-- household vault examples and learning path
-- `uHOME`-specific bundle and host-role contracts
+- **media** playback and library presentation (e.g. Jellyfin integration)
+- **controller-first** kiosk / thin console and scheduling on the Linux host
+- **decentralised LAN** household services
+- **Steam/Linux** gaming and launcher surfaces; **curated** games/apps library
+- thin UX that **surfaces Home Assistant** when `uHOME-matter` contracts are present
 
 ### `uHOME-matter`
 
 Owns:
 
-- Matter and Home Assistant extension contracts
-- local automation clone catalogs and target maps
-- bridge-facing adapter definitions consumed by the server runtime
-
-### `uDOS-empire`
-
-Owns:
-
-- remote sync and webhook workflows
-- queueable automation or container-style job definitions
-- online provider action templates and CRM-style console workflows
+- Home Assistant and Matter **contracts**, bridge definitions, clone/target maps
+- assets the **kiosk** consumes for automation visibility
 
 ### `sonic-screwdriver`
 
 Owns:
 
-- deployment planning
-- hardware bootstrap
-- USB, rescue, and dual-boot install pathways
-- generic install execution and hardware-facing workflows
+- **Install, recovery, Ventoy/USB, dual-boot** bootstrap **into** uHOME
+- generic hardware-facing workflows (uHOME must not swallow this product)
 
-### Client Repos
+### `uDOS-core` (optional alignment)
+
+May publish **shared** JSON contracts (e.g. sync-record shapes) that uHOME can
+read when a sibling checkout exists—**compatibility**, not ownership of the uHOME
+product.
+
+### Client repos (`uHOME-client`, apps)
 
 Own:
 
-- Android, TV, and other device-native client implementations
+- remotes and companions; not the household server runtime
 
 ## Boundary Rules
 
-- `uHOME-server` is not a second core runtime beside `uDOS-core`
-- `uHOME-server` should not absorb generic deployment ownership that belongs in
-  `sonic-screwdriver`
-- `sonic-screwdriver` should not redefine `uHOME` runtime architecture
-- client implementations should consume stable server contracts rather than
-  being embedded in this repo
-- local automation contract ownership belongs in `uHOME-matter`, even when
-  runtime support still exists in `uHOME-server`
+- `uHOME-server` is **not** `sonic-screwdriver` and does not own the USB installer product.
+- `sonic-screwdriver` does not redefine uHOME’s media/kiosk/automation architecture.
+- Automation **contract** ownership stays in `uHOME-matter` even when transitional bridge code still lives in the server repo.
+- uHOME is **not** a subordinate “service of uDOS”; cross-repo docs and contracts are **adjacent**, not hierarchical.
 
-## Integration Contract
+## Integration (optional)
 
-`uHOME-server` connects back to `uDOS-core`, `uDOS-shell`, and `uDOS-wizard`
-through:
+Where the wider family still shares artifacts, uHOME may consume:
 
-- shared contracts and schemas
-- workspace defaults and compatibility surfaces
-- pathway documentation that uses the same architecture language
-- install examples that remain compatible with `sonic-screwdriver`
+- **Sonic** install examples and paths for home deployments
+- optional third-party contract JSON via explicit paths or env overrides (no default
+  checkout of other family repos)
+
+No requirement that Empire, Wizard, or Ubuntu command-centre flows define uHOME’s operator story.

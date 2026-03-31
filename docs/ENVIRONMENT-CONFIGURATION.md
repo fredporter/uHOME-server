@@ -12,7 +12,15 @@ environment:
 - `JELLYFIN_URL`: base URL for the local Jellyfin instance
 - `JELLYFIN_API_KEY`: API key used for Jellyfin requests
 - `HDHOMERUN_HOST`: optional HDHomeRun tuner hostname or IP
+- `UHOME_TUNER_DISCOVERY_EXTRA_HOSTS`: optional comma-separated hostnames or IPs
+  probed by `uhome.tuner.discover` after the explicit `host` param, `HDHOMERUN_HOST`,
+  and before `hdhomerun.local`
 - `HA_BRIDGE_ENABLED`: `true`/`false` toggle for Home Assistant bridge behavior
+- `UHOME_SYNC_RECORD_CONTRACT_PATH` / `UHOME_SYNC_RECORD_SCHEMA_PATH`: override paths
+  to bundled sync-record JSON contract and JSON Schema (defaults under
+  `src/uhome_server/contracts/`)
+- `UHOME_NETWORK_POLICY_CONTRACT_PATH` / `UHOME_NETWORK_POLICY_SCHEMA_PATH`: override
+  paths for the uHOME LAN policy contract and schema
 
 Those values are resolved in [`src/uhome_server/config.py`](../src/uhome_server/config.py)
 and override values stored in `memory/config/uhome.json`.

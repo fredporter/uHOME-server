@@ -19,3 +19,4 @@ DerivedData/
 .gradle/
 memory/
 docs/.compost/
+src/uhome_server.egg-info/

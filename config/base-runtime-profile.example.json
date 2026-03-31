@@ -8,7 +8,6 @@
     "playback"
   ],
   "extensions": [
-    "uHOME-matter",
-    "uDOS-empire"
+    "uHOME-matter"
   ]
 }

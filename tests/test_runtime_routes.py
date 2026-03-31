@@ -101,32 +101,17 @@ def test_runtime_info_shape(monkeypatch):
     assert "python_version" in body
     assert "platform" in body
     assert "settings" in body
-    assert "integration_contracts" in body
 
 
-def test_sync_record_contract_route_reports_shared_contract(monkeypatch):
-    monkeypatch.setattr(
-        runtime_routes,
-        "sync_record_contract_info",
-        lambda: {
-            "contract_path": "/tmp/uDOS-core/contracts/sync-record-contract.json",
-            "schema_path": "/tmp/uDOS-core/schemas/sync-record-contract.schema.json",
-            "version": "v2.0.4",
-            "owner": "uDOS-core",
-            "schema_title": "uDOS Sync Record Contract",
-            "record_types": ["canonical_contact", "activity", "binder_project", "sync_metadata"],
-            "envelope_collections": ["contacts", "activities", "binders", "sync_metadata"],
-        },
-    )
-    app = FastAPI()
-    app.include_router(runtime_routes.create_runtime_routes())
-    client = TestClient(app)
+def test_sync_record_contract_route_reports_bundled_contract(monkeypatch):
+    client = _client(monkeypatch)
     response = client.get("/api/runtime/contracts/sync-record")
     assert response.status_code == 200
     body = response.json()
     assert body["version"] == "v2.0.4"
-    assert body["owner"] == "uDOS-core"
+    assert body["owner"] == "uHOME-server"
     assert "binder_project" in body["record_types"]
+    assert "sync-record-contract.json" in body["contract_path"]
 
 
 def test_sync_record_validation_route_accepts_valid_envelope(monkeypatch):
@@ -192,44 +177,35 @@ def test_sync_record_validation_route_rejects_invalid_envelope(monkeypatch):
     assert body["error"] == "sync-record-validation-failed"
 
 
-def test_workflow_automation_contract_route_reports_shared_boundary(monkeypatch):
-    monkeypatch.setattr(
-        runtime_routes,
-        "workflow_automation_contract_info",
-        lambda: {
-            "workflow_state_contract": "uDOS-core/contracts/workflow-state-contract.json",
-            "workflow_action_contract": "uDOS-core/contracts/workflow-action-contract.json",
-            "automation_job_contract": "uDOS-core/contracts/automation-job-contract.json",
-            "automation_result_contract": "uDOS-core/contracts/automation-result-contract.json",
-            "workflow_owner": "uDOS-wizard",
-            "automation_fulfillment_owner": "uHOME-server",
-        },
-    )
-    app = FastAPI()
-    app.include_router(runtime_routes.create_runtime_routes())
-    client = TestClient(app)
+def test_workflow_automation_contract_route_reports_uhome_bundle(monkeypatch):
+    client = _client(monkeypatch)
     response = client.get("/api/runtime/contracts/workflow-automation")
     assert response.status_code == 200
     body = response.json()
-    assert body["workflow_owner"] == "uDOS-wizard"
+    assert body["workflow_owner"] == "uHOME-server"
     assert body["automation_fulfillment_owner"] == "uHOME-server"
+    assert body["automation_job_contract"].startswith("uhome_server/contracts/")
+    assert "integration_note" in body
 
 
-def test_uhome_network_policy_contract_route_reports_wizard_boundary(monkeypatch):
+def test_uhome_network_policy_contract_route_reports_uhome_bundle(monkeypatch):
     monkeypatch.setattr(
         runtime_routes,
         "uhome_network_policy_contract_info",
         lambda: {
-            "contract_path": "/tmp/uDOS-wizard/contracts/uhome-network-policy-contract.json",
-            "schema_path": "/tmp/uDOS-wizard/contracts/uhome-network-policy.schema.json",
+            "contract_path": "/tmp/uhome-network-policy-contract.json",
+            "schema_path": "/tmp/uhome-network-policy.schema.json",
             "version": "v2.0.4",
-            "owner": "uDOS-wizard",
-            "package": "wizard-uhome-network-policy-contract",
-            "schema_title": "WizardToUHomeNetworkPolicy",
-            "profiles": ["beacon", "crypt", "home", "tomb"],
+            "owner": "uHOME-server",
+            "package": "uhome-network-policy-contract",
+            "schema_title": "UHomeNetworkPolicy",
+            "profiles": ["beacon", "crypt", "home", "lan", "tomb"],
             "runtime_owners": ["uHOME-server"],
-            "policy_owners": ["uDOS-wizard"],
-            "wizard_routes": {"contract": {"path": "/contracts/uhome/network-policy"}},
+            "policy_owners": ["uHOME-server"],
+            "routes": {"contract": {"path": "/api/runtime/contracts/uhome-network-policy"}},
+            "networking_model": "regular-lan",
+            "deployment": {"default_profile": "lan"},
+            "future_integration": "ubuntu later",
         },
     )
     app = FastAPI()
@@ -238,8 +214,8 @@ def test_uhome_network_policy_contract_route_reports_wizard_boundary(monkeypatch
     response = client.get("/api/runtime/contracts/uhome-network-policy")
     assert response.status_code == 200
     body = response.json()
-    assert body["owner"] == "uDOS-wizard"
-    assert "beacon" in body["profiles"]
+    assert body["owner"] == "uHOME-server"
+    assert "lan" in body["profiles"]
     assert body["runtime_owners"] == ["uHOME-server"]
 
 
@@ -253,7 +229,7 @@ def test_uhome_network_policy_validation_route_accepts_and_rejects_payloads(monk
                 "contract_version": payload.get("contract_version", "v2.0.4"),
                 "profile_id": payload.get("profile_id"),
                 "runtime_owner": "uHOME-server",
-                "policy_owner": "uDOS-wizard",
+                "policy_owner": "uHOME-server",
                 "consumer_repos": payload.get("consumer_repos", []),
                 "error": None if payload["profile_id"] == "beacon" else "uhome-network-policy-validation-failed",
             },
@@ -285,6 +261,41 @@ def test_uhome_network_policy_validation_route_accepts_and_rejects_payloads(monk
     )
     assert invalid.status_code == 400
     assert invalid.json()["error"] == "uhome-network-policy-validation-failed"
+
+
+def test_uhome_network_policy_schema_route_returns_bundled_schema():
+    app = FastAPI()
+    app.include_router(runtime_routes.create_runtime_routes())
+    client = TestClient(app)
+    response = client.get("/api/runtime/contracts/uhome-network-policy/schema")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "UHomeNetworkPolicy"
+    assert "lan" in body["properties"]["profile_id"]["enum"]
+
+
+def test_uhome_network_policy_lan_payload_validates_end_to_end():
+    app = FastAPI()
+    app.include_router(runtime_routes.create_runtime_routes())
+    client = TestClient(app)
+    payload = {
+        "contract_version": "v2.0.4",
+        "profile_id": "lan",
+        "network_scope": "private",
+        "visibility": "visible",
+        "auth_mode": "password-protected",
+        "vault_access": "local-only",
+        "internet_sharing": "disabled",
+        "runtime_owner": "uHOME-server",
+        "policy_owner": "uHOME-server",
+        "consumer_repos": ["uHOME-server"],
+        "secret_refs": [],
+    }
+    response = client.post("/api/runtime/contracts/uhome-network-policy/validate", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ok"] is True
+    assert body["profile_id"] == "lan"
 
 
 def test_automation_routes_queue_and_record_results(monkeypatch):
@@ -349,7 +360,7 @@ def test_automation_routes_queue_and_record_results(monkeypatch):
             "job_id": "job:test",
             "requested_capability": "render-export",
             "payload_ref": "memory://render/export",
-            "origin_surface": "uDOS-wizard",
+            "origin_surface": "uHOME-kiosk",
             "policy_flags": {"workflow_id": "mission-beta", "step_id": "step-4"},
             "queued_at": "2026-03-15T00:00:00Z",
         },

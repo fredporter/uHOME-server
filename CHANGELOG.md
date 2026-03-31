@@ -8,11 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `uhome migrate wizard-to-kiosk`: copies `memory/wizard/uhome/presentation.json` to
+  `memory/kiosk/uhome/`, rewrites `wizard_mode_active` → `kiosk_local_session` in that
+  JSON, and updates `library/**/container.json` (`wizard_only` → `thin_kiosk_only`,
+  `callable_from` `wizard` → `thin-kiosk`). Flags: `--dry-run`, `--force`,
+  `--remove-legacy`, `--skip-presentation`, `--skip-manifests`.
+- Bundled household network policy contract + schema in `src/uhome_server/contracts/`
+  with a default **`lan`** profile for regular home/office LANs (no `uDOS-wizard` checkout)
+- `GET /api/runtime/contracts/uhome-network-policy/schema`
 - Health and readiness endpoints (`/api/health`, `/api/ready`, `/api/debug/registries`)
 - Backup and restore CLI commands (`uhome backup create`, `uhome backup restore`, `uhome backup list`)
 - Shared sync-record contract inspection and envelope validation commands (`uhome contracts ...`)
 - Runtime sync-record ingest and retrieval endpoints backed by file-based envelope storage
-- Sync-envelope ingest is now reachable from exported `uDOS-empire` sync packages
+- Sync-envelope ingest supports standard family sync-record envelopes
 - Comprehensive operational runbooks (6 guides covering storage, nodes, registries, degradation)
 - Deployment Guide for Ubuntu 20.04+ LTS systems
 - Post-install validation script for automated deployment verification
@@ -21,13 +29,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Operations README as central navigation hub for all operational documentation
 
 ### Changed
+- **Code decoupling:** sync-record contract + schema ship under `uhome_server/contracts/`
+  (no `uDOS-core` path); optional overrides `UHOME_SYNC_RECORD_CONTRACT_PATH` /
+  `UHOME_SYNC_RECORD_SCHEMA_PATH`. Removed `get_udos_family_root` from server config.
+- Network policy validation module renamed to `uhome_network_policy.py` (replaces
+  `wizard_policy.py`). Workflow/automation contract metadata points at
+  `uhome_server/contracts/*.json` identifiers; default automation `origin_surface` is
+  `uHOME-kiosk`. Launcher state is written under `memory/kiosk/uhome/` (still reads
+  legacy `memory/wizard/uhome/` if present). JSON config accepts `legacy-uhome.json`
+  before `wizard.json`.
+- **uHOME-client:** bundled `src/runtime-services.json`; profiles are standalone with
+  `shell_adapter` `thin-kiosk`; optional orchestration via   `UH_EXTERNAL_ORCHESTRATION_CONTRACT_PATH`
+  and transport `orchestration-assisted` only. Family root: prefer `UHOME_FAMILY_ROOT`,
+  with legacy fallback `UDOS_UHOME_FAMILY_ROOT`.
+- Library catalog: `wrapper_route` field, `thin-kiosk` / `thin_kiosk_only` terminology
+  (still accepts legacy `wizard` / `wizard_only` in manifests).
+- Product docs (`README`, `docs/architecture.md`, `base-runtime-boundary.md`,
+  `uHOME-spec.md`, pathway `REPO-FAMILY.md`) reposition **uHOME** as a standalone
+  media + controller-first kiosk + decentralised LAN + dual-boot (Sonic) +
+  curated library + HA-via-thin-UX product—not a sub-part of uDOS; **`uHOME-matter`**
+  README aligned for kiosk-visible automation
+- Network policy loads from the uHOME package bundle; `policy_owner` payloads use
+  `uHOME-server`. `/api/runtime/contracts/uhome-network-policy` includes `routes`,
+  `deployment`, and `future_integration` metadata (replaces `wizard_routes` on that payload).
+- `/api/runtime/contracts/workflow-automation`: `workflow_owner` is `uHOME-server` for the
+  standalone stream; `integration_note` mentions optional future **uDOS-ubuntu** coordination.
 - Improved backup timestamp resolution to include microseconds (prevents filename conflicts)
 
 ### Deprecated
 - None
 
 ### Removed
-- None
+- Coupling to `uDOS-empire` for runtime info and related docs/templates
 
 ### Fixed
 - None

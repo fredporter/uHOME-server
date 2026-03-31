@@ -144,7 +144,7 @@ def test_launcher_session_persistence(launcher_api_client, launcher_test_workspa
     start_data = start_response.json()
     
     # Verify state file was created
-    state_path = launcher_test_workspace / "memory" / "wizard" / "uhome" / "presentation.json"
+    state_path = launcher_test_workspace / "memory" / "kiosk" / "uhome" / "presentation.json"
     assert state_path.exists()
     
     # Verify state file content

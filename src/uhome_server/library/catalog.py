@@ -34,14 +34,14 @@ class ContainerCatalogEntry:
     available: bool = False
     version: str | None = None
     api_prefix: str | None = None
-    wizard_route: str | None = None
+    wrapper_route: str | None = None
     category: str = "container"
     source: str = "library"
     execution: ContainerExecutionRules = field(
         default_factory=lambda: ContainerExecutionRules(
             execution_model="container-library-v1",
             runtime_owner="shared",
-            callable_from=["uhome", "wizard"],
+            callable_from=["uhome", "thin-kiosk"],
         )
     )
     lens_vars: dict[str, Any] = field(default_factory=dict)
@@ -76,15 +76,25 @@ class ContainerCatalogService:
             service = payload.get("service", {})
             launch_config = payload.get("launch_config", {})
             entry_id = str(container.get("id") or candidate.name).strip().lower()
+            kiosk_exclusive = bool(policy.get("thin_kiosk_only") or policy.get("wizard_only"))
             runtime_owner = (
-                "wizard"
-                if bool(policy.get("wizard_only"))
+                "thin-kiosk"
+                if kiosk_exclusive
                 else str(policy.get("runtime_owner") or "shared").strip().lower()
             )
             resolved_repo_path = self._resolve_repo_path(payload.get("repo_path"), fallback=candidate)
-            callable_from = self._normalize_string_list(
-                payload.get("callable_from") or metadata.get("callable_from") or ["uhome", "wizard"]
+            raw_callable = (
+                payload.get("callable_from")
+                or metadata.get("callable_from")
+                or ["uhome", "thin-kiosk"]
             )
+            callable_from = [
+                "thin-kiosk" if str(x).strip().lower() == "wizard" else str(x).strip()
+                for x in (raw_callable if isinstance(raw_callable, list) else [])
+                if isinstance(x, str) and str(x).strip()
+            ]
+            if not callable_from:
+                callable_from = ["uhome", "thin-kiosk"]
             entries.append(
                 ContainerCatalogEntry(
                     entry_id=entry_id,
@@ -95,7 +105,7 @@ class ContainerCatalogService:
                     available=True,
                     version=self._coerce_optional_str(container.get("version")),
                     api_prefix=self._coerce_optional_str(service.get("browser_route")),
-                    wizard_route=self._coerce_optional_str(integration.get("wrapper_path")),
+                    wrapper_route=self._coerce_optional_str(integration.get("wrapper_path")),
                     category=str(metadata.get("category") or "container").strip(),
                     execution=ContainerExecutionRules(
                         execution_model=str(policy.get("execution_model") or "container-library-v1").strip(),

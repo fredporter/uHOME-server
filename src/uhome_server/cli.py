@@ -29,6 +29,7 @@ from uhome_server.installer.promotion import (
     verify_promoted_target,
 )
 from uhome_server.installer.staging import stage_install_artifacts
+from uhome_server.migrations.wizard_to_kiosk import run_wizard_to_kiosk_migration
 from uhome_server.services.uhome_presentation_service import (
     get_uhome_presentation_service,
 )
@@ -377,7 +378,7 @@ def contracts_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="uhome-contracts", description="Inspect shared contract assets.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    sync_parser = subparsers.add_parser("sync-record", help="Show the shared sync-record contract metadata.")
+    sync_parser = subparsers.add_parser("sync-record", help="Show the uHOME-bundled sync-record contract metadata.")
     sync_parser.add_argument("--output", help="Optional path to write JSON result.")
     validate_parser = subparsers.add_parser("validate-sync-record", help="Validate a sync-record envelope JSON file.")
     validate_parser.add_argument("--input", required=True, help="Path to the sync-record envelope JSON file.")
@@ -422,6 +423,51 @@ def contracts_main(argv: list[str] | None = None) -> int:
     return 2
 
 
+def migrate_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="uhome-migrate", description="uHOME data and layout migrations.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    w2k = subparsers.add_parser(
+        "wizard-to-kiosk",
+        help="Copy memory/wizard/uhome/presentation.json to memory/kiosk/uhome/ and update library container.json keys.",
+    )
+    w2k.add_argument("--repo-root", help="Repository root (default: installed uHOME-server repo).")
+    w2k.add_argument("--dry-run", action="store_true", help="Print actions without writing files.")
+    w2k.add_argument("--force", action="store_true", help="Overwrite memory/kiosk/uhome/presentation.json if it exists.")
+    w2k.add_argument(
+        "--remove-legacy",
+        action="store_true",
+        help="After a successful copy, delete the legacy wizard presentation.json.",
+    )
+    w2k.add_argument("--skip-presentation", action="store_true", help="Only process library/**/container.json files.")
+    w2k.add_argument("--skip-manifests", action="store_true", help="Only process presentation state.")
+    w2k.add_argument("--output", help="Optional path to write JSON result.")
+
+    args = parser.parse_args(argv)
+    repo_root = Path(args.repo_root).expanduser().resolve() if args.repo_root else get_repo_root()
+
+    if args.command == "wizard-to-kiosk":
+        report = run_wizard_to_kiosk_migration(
+            repo_root,
+            dry_run=args.dry_run,
+            force=args.force,
+            remove_legacy=args.remove_legacy,
+            skip_presentation=args.skip_presentation,
+            skip_manifests=args.skip_manifests,
+        )
+        payload = {
+            "ok": report.ok,
+            "presentation": report.presentation,
+            "manifests": report.manifests,
+            "errors": report.errors,
+        }
+        _write_output(payload, args.output)
+        return 0 if report.ok else 1
+
+    parser.error(f"Unsupported migrate command: {args.command}")
+    return 2
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="uhome", description="uHOME operator CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -429,6 +475,7 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("installer", help="Manage install plans and preflight.")
     subparsers.add_parser("backup", help="Backup and restore server state.")
     subparsers.add_parser("contracts", help="Inspect shared contract assets.")
+    subparsers.add_parser("migrate", help="Run data layout migrations.")
     args, remaining = parser.parse_known_args(argv)
     if args.command == "launcher":
         return launcher_main(remaining)
@@ -438,6 +485,8 @@ def main(argv: list[str] | None = None) -> int:
         return backup_main(remaining)
     if args.command == "contracts":
         return contracts_main(remaining)
+    if args.command == "migrate":
+        return migrate_main(remaining)
     parser.error(f"Unsupported command: {args.command}")
     return 2
 
